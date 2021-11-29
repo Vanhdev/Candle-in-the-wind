@@ -27,6 +27,10 @@
                 <form asp-controller="Account" asp-action="Register" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
+                    <label for="">Họ và tên</label>
+                    <input asp-for="UserName" type="text">
+                    <span asp-validation-for="UserName" class="text-danger"></span>
+
                     <label for="">Email</label>
                     <input asp-for="RegisterEmail" type="text">
                     <span asp-validation-for="RegisterEmail" class="text-danger"></span>
