@@ -26,7 +26,7 @@ namespace CandleInTheWind.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
         {
-            var comments = await _context.Comments.ToListAsync();
+            var comments = await _context.Comments.Include(comment => comment.User).Include(comment => comment.Post).ToListAsync();
             var responseComments = comments.Select(comment => toDTO(comment));
             return Ok(responseComments);
         }
@@ -35,7 +35,7 @@ namespace CandleInTheWind.API.Controllers
         [HttpGet("{PostId}")]
         public async Task<ActionResult<CommentDTO>> GetComment(int PostId)
         {
-            var post = _context.Posts.FirstOrDefault(post => post.Id == PostId && (int)post.Status == 1);
+            var post = _context.Posts.FirstOrDefault(post => post.Id == PostId && post.Status == PostStatus.Approved);
             if (post == null) return NotFound();
 
             var comments = await _context.Comments.Include(comment => comment.User)

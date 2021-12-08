@@ -28,7 +28,7 @@ namespace CandleInTheWind.API.Controllers
         {
 
             var posts = await _context.Posts.Include(posts => posts.User)
-                                            .Where(post => (int)post.Status == 1)
+                                            .Where(post => post.Status == PostStatus.Approved)
                                             .ToListAsync();
             // 1 is approved, 2 is not approved, 0 is pending approval.
 
@@ -55,7 +55,7 @@ namespace CandleInTheWind.API.Controllers
             if(pageSize < 0) pageSize = 1;
 
             var approvedPosts = _context.Posts.Include(post => post.User)
-                                              .Where(post => (int)post.Status == 1);
+                                              .Where(post => post.Status == PostStatus.Approved);
             int count = approvedPosts.Count();
             int totalPages = count / pageSize + ((count % pageSize == 0) ? 0 : 1);
 
