@@ -19,13 +19,13 @@ namespace CandleInTheWind.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController: ControllerBase
+    public class AccountsController: ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
         //private readonly UserManager<User> _userManager;
 
-        public AccountController(ApplicationDbContext context, IConfiguration config)
+        public AccountsController(ApplicationDbContext context, IConfiguration config)
         {
             _context = context;
             _config = config;
@@ -142,7 +142,7 @@ namespace CandleInTheWind.API.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            if (user.Email == "admin@gmal.com")
+            if (user.Email == "admin@gmail.com")
                 authClaims.Add(new Claim(ClaimTypes.Role, "Admin"));
             else
                 authClaims.Add(new Claim(ClaimTypes.Role, "User"));
@@ -153,7 +153,7 @@ namespace CandleInTheWind.API.Controllers
             {
                 Issuer = _config["Jwt:ValidIssuer"],
                 Audience = _config["Jwt:ValidAudience"],
-                Expires = DateTime.UtcNow.AddMinutes(5),
+                Expires = DateTime.UtcNow.AddMinutes(15),
                 Subject = new ClaimsIdentity(authClaims),
                 SigningCredentials = new SigningCredentials(authSignKey, SecurityAlgorithms.HmacSha256Signature),
             });

@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using CandleInTheWind.Data;
 using CandleInTheWind.Models;
 using CandleInTheWind.API.Models.Posts;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -79,6 +81,21 @@ namespace CandleInTheWind.API.Controllers
 
         }
 
+        [HttpGet("mypost")]
+        [Authorize]
+        public async Task<ActionResult> GetPostByUserId()
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+            var userId = int.Parse(userIdClaim.Value);
+            var myposts = await _context.Posts
+                                        .Include(post => post.User)
+                                        .Where(post => post.User.Id == userId)
+                                        .ToListAsync();
+            var mypostsReponse = myposts.Select(post => toDTO(post));
+            return Ok(mypostsReponse);
+        }
         /*
         // GET: api/Posts/5
         [HttpGet("{id}")]
@@ -104,7 +121,7 @@ namespace CandleInTheWind.API.Controllers
                 Id = postID,
                 Title = post.Title,
                 Content = post.Content,
-                ApprovedAt = (DateTime)post.ApprovedAt,
+                ApprovedAt = post.ApprovedAt,
                 Commentable = post.Commentable,
                 CommentCount = Comment_Count,
                 UserId = post.User.Id,

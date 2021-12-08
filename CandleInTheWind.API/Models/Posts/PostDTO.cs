@@ -11,7 +11,7 @@ namespace CandleInTheWind.API.Models.Posts
         public int Id { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
-        public DateTime ApprovedAt { get; set; }
+        public DateTime? ApprovedAt { get; set; }
         public bool Commentable { get; set; }
 
         public int  UserId { get; set; }
