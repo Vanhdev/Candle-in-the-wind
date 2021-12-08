@@ -24,14 +24,16 @@ namespace CandleInTheWind.API.Controllers
 
         // GET: api/Comments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Comment>>> GetComments()
+        public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
         {
-            return await _context.Comments.ToListAsync();
+            var comments = await _context.Comments.ToListAsync();
+            var responseComments = comments.Select(comment => toDTO(comment));
+            return Ok(responseComments);
         }
 
         // GET: api/Comments/5
         [HttpGet("{PostId}")]
-        public async Task<ActionResult<Comment>> GetComment(int PostId)
+        public async Task<ActionResult<CommentDTO>> GetComment(int PostId)
         {
             var post = _context.Posts.FirstOrDefault(post => post.Id == PostId && (int)post.Status == 1);
             if (post == null) return NotFound();
