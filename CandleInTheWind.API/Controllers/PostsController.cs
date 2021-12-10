@@ -111,6 +111,52 @@ namespace CandleInTheWind.API.Controllers
             return Ok(toDTO(post));
         }
         */
+
+
+        /*
+        [HttpPost("Posts")]
+        [Authorize]
+        public async Task<ActionResult> CreatePost([FromBody]PostDTO dto)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            var userNameClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+            if (userIdClaim == null) return BadRequest();
+
+            var userId = int.Parse(userIdClaim.Value);
+            var userName = userIdClaim.Value;
+
+            
+
+            try
+            {
+                if (dto == null)
+                    return BadRequest();
+                var createdPost = new Post.
+                {
+                    Commentable = true,
+                    Title = dto.Title,
+                    Content = dto.Content,
+                    Status = 
+                }
+                
+            }
+            catch (Exception)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from database");
+            }
+
+
+
+        }
+        
+        */
+        
+
+
+
+
+
         private PostDTO toDTO(Post post)
         {
             var postID = post.Id;
