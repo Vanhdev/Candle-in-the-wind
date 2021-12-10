@@ -24,18 +24,9 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
-        /*
-        // GET: api/Orders
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
-        {
-            return await _context.Orders.ToListAsync();
-        }
-        */
-
-        
-
-        //GET: api/Order
+      
+  
+        //GET: api/Order/MyOders
         [HttpGet("MyOrders")]
         [Authorize]
         public async Task<ActionResult> GetOrderByUserId()
@@ -88,7 +79,7 @@ namespace CandleInTheWind.API.Controllers
             {
                 Id = order.Id,
                 PurchaseDate = order.PurchasedDate,
-                OrderStatus = (int)order.Status,
+                Status = order.Status,
                 Total = order.Total,
                 ProductName = order.Product.Name
             };
@@ -101,7 +92,7 @@ namespace CandleInTheWind.API.Controllers
             {
                 Id = order.Id,
                 PurchaseDate = order.PurchasedDate,
-                OrderStatus = (int)order.Status,
+                Status = order.Status,
                 UnitPrice = order.UnitPrice,
                 Quantity = order.Quantity,
                 Total = order.Total,
@@ -116,26 +107,45 @@ namespace CandleInTheWind.API.Controllers
 
 
 
-        /*
-        // PUT: api/Orders/5
+        
+        // PUT: api/Orders/MyOrders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(int id, Order order)
+        [HttpPut("MyOrders/Cancel/{OrderId}")]
+        [Authorize]
+        public async Task<IActionResult> PutOrder(int OrderId)
         {
-            if (id != order.Id)
-            {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
                 return BadRequest();
+            
+            var userId = int.Parse(userIdClaim.Value);
+
+            var order = await _context.Orders.Include(order => order.User)
+                                             .Where(order => order.User.Id == userId)
+                                             .FirstOrDefaultAsync(order => order.Id == OrderId);
+
+            if (order == null)
+                return NotFound(new {Error = "Không tìm thấy đơn hàng"});
+            
+            if(order.Status.Equals(OrderStatus.Canceled))
+            {
+                return BadRequest(new { Error = "Đơn hàng đã bị huỷ từ trước" });
+            }
+            else
+            {
+                order.Status = OrderStatus.Canceled;
             }
 
             _context.Entry(order).State = EntityState.Modified;
 
+            
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!OrderExists(id))
+                if (!OrderExists(OrderId))
                 {
                     return NotFound();
                 }
@@ -143,11 +153,12 @@ namespace CandleInTheWind.API.Controllers
                 {
                     throw;
                 }
-            }
+            } 
 
-            return NoContent();
+            return Ok("Huỷ đơn hàng thành công.");
         }
 
+        /*
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -174,12 +185,12 @@ namespace CandleInTheWind.API.Controllers
 
             return NoContent();
         }
-
+        */
         private bool OrderExists(int id)
         {
             return _context.Orders.Any(e => e.Id == id);
         }
-        */
+        
         
 
     }

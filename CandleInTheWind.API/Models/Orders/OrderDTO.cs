@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using CandleInTheWind.Models;
 
 namespace CandleInTheWind.API.Models.Orders
 {
@@ -15,7 +15,7 @@ namespace CandleInTheWind.API.Models.Orders
         public DateTime PurchaseDate { get; set; }
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
-        public int OrderStatus { get; set; }
+        public OrderStatus Status{ get; set; }
         public decimal Total { get; set; }
         public int UserId { get; set; }
         public int ProductId { get; set; }
