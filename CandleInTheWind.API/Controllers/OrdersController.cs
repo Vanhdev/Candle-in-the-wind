@@ -112,7 +112,7 @@ namespace CandleInTheWind.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("MyOrders/Cancel/{OrderId}")]
         [Authorize]
-        public async Task<IActionResult> PutOrder(int OrderId)
+        public async Task<IActionResult> CancelOrder(int OrderId)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
