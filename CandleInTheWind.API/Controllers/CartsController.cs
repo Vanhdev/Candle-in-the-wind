@@ -70,7 +70,7 @@ namespace CandleInTheWind.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 
         [HttpPut()]
-        public async Task<ActionResult<UpdateQuantityDTO>> UpdateQuantity([FromBody]int productId, [FromBody]int quantity)
+        public async Task<ActionResult<UpdateQuantityDTO>> UpdateQuantity([FromQuery]int productId, [FromQuery]int quantity)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -85,7 +85,7 @@ namespace CandleInTheWind.API.Controllers
                 return NotFound();
             }
 
-            if (productId < 0)
+            if (productId <= 0)
                 return BadRequest(new { Error = "Dữ liệu không hợp lệ" });
             if (quantity <= 0)
                 return BadRequest(new { Error = "Số lượng sản phẩm phải lớn hơn 0" });
@@ -125,7 +125,7 @@ namespace CandleInTheWind.API.Controllers
         // POST: api/Carts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> AddProductToCart([FromBody]int productId, [FromBody]int quantity = 1)
+        public async Task<IActionResult> AddProductToCart([FromQuery]int productId, [FromQuery]int quantity = 1)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -140,7 +140,7 @@ namespace CandleInTheWind.API.Controllers
                 return NotFound();
             }
 
-            if (productId < 0)
+            if (productId <= 0)
                 return BadRequest(new { Error = "Dữ liệu không hợp lệ" });
             if (quantity <= 0)
                 return BadRequest(new { Error = "Số lượng sản phẩm phải lớn hơn 0" });
@@ -177,7 +177,7 @@ namespace CandleInTheWind.API.Controllers
 
         // DELETE: api/Carts/5
         [HttpDelete("{productId}")]
-        public async Task<IActionResult> DeleteProductInCart(int productId)
+        public async Task<IActionResult> DeleteProductInCart([FromRoute]int productId)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
