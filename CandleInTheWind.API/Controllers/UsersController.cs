@@ -103,7 +103,7 @@ namespace CandleInTheWind.API.Controllers
         }
 
 
-        [HttpPut("UpdatePassword")]
+        [HttpPut("ChangePassword")]
         [Authorize]
         public async Task<IActionResult> UpdatePassword([FromBody]UpdatePasswordDTO dto)
         {

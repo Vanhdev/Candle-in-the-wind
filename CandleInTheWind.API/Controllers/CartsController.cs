@@ -69,8 +69,8 @@ namespace CandleInTheWind.API.Controllers
         // PUT: api/Carts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 
-        [HttpPut()]
-        public async Task<ActionResult<UpdateQuantityDTO>> UpdateQuantity([FromQuery]int productId, [FromQuery]int quantity)
+        [HttpPut("ChangeQuantity")]
+        public async Task<ActionResult<UpdateQuantityDTO>> ChangeQuantity([FromQuery]int productId, [FromQuery]int quantity)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
