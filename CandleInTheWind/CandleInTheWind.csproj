@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\**" />
+    <Content Remove="Areas\**" />
+    <EmbeddedResource Remove="Areas\**" />
+    <None Remove="Areas\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.12" />
@@ -14,10 +21,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.12" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Areas\Identity\" />
   </ItemGroup>
 
 </Project>
