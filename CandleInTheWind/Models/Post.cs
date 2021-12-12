@@ -30,12 +30,16 @@ namespace CandleInTheWind.Models
         public DateTime? ApprovedAt { get; set; }
 
         [Required]
+        [EnumDataType(typeof(PostStatus))]
         [Column(TypeName = "tinyint")]
         public PostStatus Status { get; set; } = PostStatus.NotApprovedYet;
 
         [Required]
         public bool Commentable { get; set; } = true;
 
+        
         public virtual User User { get; set; }
+
+        public virtual ICollection<Comment> Comments { get; set; }
     }
 }

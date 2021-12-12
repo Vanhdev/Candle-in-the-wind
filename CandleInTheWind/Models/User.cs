@@ -19,27 +19,34 @@ namespace CandleInTheWind.Models
     public class User
     {
         public int Id { get; set; }
+
         [Required]
         [StringLength(50)]
         public string UserName { get; set; }
 
         [Required]
+        [StringLength(256)]
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
 
+        [StringLength(20)]
         [DataType(DataType.PhoneNumber)]
         public string PhoneNumber { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         public string PasswordHash { get; set; }
+
+        [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
         [Required]
+        [EnumDataType(typeof(Gender))]
         [Column(TypeName = "tinyint")]
         public Gender Gender { get; set; }
 
         [Required]
+        [Range(0, int.MaxValue)]
         public int Points { get; set; } = 0;
 
         public virtual ICollection<Order> Orders{ get; set; }

@@ -21,17 +21,10 @@ namespace CandleInTheWind.Models
         public int Id { get; set; }
 
         [Required]
-        public DateTime PurchasedDate { get; set; }
+        public DateTime PurchasedDate { get; set; } = DateTime.Now;
 
         [Required]
-        [Column(TypeName = "money")]
-        public decimal UnitPrice { get; set; }
-
-        [Required]
-        [Range(1, int.MaxValue)]
-        public int Quantity { get; set; }
-
-        [Required]
+        [EnumDataType(typeof(OrderStatus))]
         [Column(TypeName = "tinyint")]
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
@@ -39,10 +32,13 @@ namespace CandleInTheWind.Models
         [Column(TypeName = "money")]
         public decimal Total { get; set; }
 
+        public int? VoucherId { get; set; }
         public virtual Voucher Voucher { get; set; } = null;
-        
+
+        [Required]
+        public int UserId { get; set; }
         public virtual User User { get; set; }
-        
-        public virtual Product Product { get; set; }
+
+        public virtual ICollection<OrderProduct> OrderProducts { get; set; }
     }
 }

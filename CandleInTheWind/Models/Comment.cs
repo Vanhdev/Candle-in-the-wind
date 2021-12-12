@@ -19,7 +19,12 @@ namespace CandleInTheWind.Models
         [Required]
         public DateTime Time { get; set; } = DateTime.Now;
 
+        [Required]
+        public int PostId { get; set; }
         public virtual Post Post { get; set; }
+
+        [Required]
+        public int UserId { get; set; }
         public virtual User User { get; set; }
     }
 }
