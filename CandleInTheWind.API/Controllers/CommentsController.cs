@@ -163,7 +163,7 @@ namespace CandleInTheWind.API.Controllers
             return Ok("Tao cmt thanh cong!");
         }
         
-
+        
         private CommentDTO toDTO(Comment comment)
         {
             return new CommentDTO
