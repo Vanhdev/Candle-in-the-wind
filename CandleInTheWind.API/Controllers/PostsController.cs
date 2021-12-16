@@ -113,48 +113,85 @@ namespace CandleInTheWind.API.Controllers
         */
 
 
-        /*
+        
         [HttpPost("Posts")]
         [Authorize]
-        public async Task<ActionResult> CreatePost([FromBody]PostDTO dto)
+        public async Task<ActionResult> CreatePost([FromBody]PostCreateDTO dto)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
-            var userNameClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
+            //var userNameClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
             if (userIdClaim == null) return BadRequest();
 
             var userId = int.Parse(userIdClaim.Value);
-            var userName = userIdClaim.Value;
-
             
+            var user = await _context.Users.FindAsync(userId);
 
-            try
+            var createdPost = new Post
             {
-                if (dto == null)
-                    return BadRequest();
-                var createdPost = new Post.
-                {
-                    Commentable = true,
-                    Title = dto.Title,
-                    Content = dto.Content,
-                    Status = 
-                }
-                
-            }
-            catch (Exception)
-            {
+                User = user,
+                Title = dto.Title,
+                Content = dto.Content,
+                ApprovedAt = null,
+                Status = PostStatus.NotApprovedYet,
+                Commentable = true,
+                Comments = null
+            };
 
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from database");
-            }
+            _context.Posts.Add(createdPost);
 
+            await _context.SaveChangesAsync();
 
+            return Ok("Tạo bài viết thành công");
 
         }
         
-        */
+        [HttpPut("MyPost/{PostId}"), Authorize]
+
+        public async Task<ActionResult> TurnOffComment([FromRoute] int PostId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var post = await _context.Posts.Include(post => post.User)
+                                           .FirstOrDefaultAsync(post => post.User.Id == userId && post.Id == PostId);
+
+            if (post == null)
+                return NotFound("Không tìm thấy bài viết");
+
+            if (post.Commentable == true)
+                post.Commentable = false;
+            else
+                return Ok("Bài viết đã được khoá bình luận");
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+
+        }
         
+        [HttpDelete("MyPosts/{PostId}"), Authorize]
+        public async Task<ActionResult> DeletePost ([FromRoute]int PostId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
 
+            var userId = int.Parse(userIdClaim.Value);
 
+            var post = await _context.Posts.Include(post => post.User)
+                                           .FirstOrDefaultAsync(post => post.Id == PostId && post.User.Id == userId);
 
+            if(post == null)
+                return NotFound(new {Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
+
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
+            
+            return NoContent();
+        }
 
 
         private PostDTO toDTO(Post post)

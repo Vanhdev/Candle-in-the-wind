@@ -131,7 +131,7 @@ namespace CandleInTheWind.API.Controllers
         
         [HttpPost("Post/{PostId}/Comments")]
         [Authorize]
-        public async Task<ActionResult<Comment>> AddComment(int PostId,[FromBody] CommentDTO dto)
+        public async Task<ActionResult<Comment>> AddComment([FromRoute]int PostId,[FromBody] CommentCreateDTO dto)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -139,20 +139,19 @@ namespace CandleInTheWind.API.Controllers
             
             var userId = int.Parse(userIdClaim.Value);
             var post = await _context.Posts.FindAsync(PostId);
-            var user = await _context.Users.FindAsync(userId);
             
             if (post == null)
                 return NotFound(new { Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
 
             if (post.Commentable == false)
                 return Ok("Bài viết đã khoá bình luận");
-            
+
+
             var comment = new Comment
             {
-                Post = post,
-                User = user,
                 Content = dto.Content,
-                Time = DateTime.Now
+                PostId = post.Id,
+                UserId = userId,
             };
             
 
@@ -164,7 +163,7 @@ namespace CandleInTheWind.API.Controllers
             return Ok("Tao cmt thanh cong!");
         }
         
-
+        
         private CommentDTO toDTO(Comment comment)
         {
             return new CommentDTO
