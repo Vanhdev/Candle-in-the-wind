@@ -115,17 +115,106 @@ namespace CandleInTheWind.API.Controllers
             return NoContent();
         }
         */
-        /*
+        
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Order>> PostOrder(Order order)
+        [HttpPost("CreateOrder"), Authorize]
+        public async Task<ActionResult<Order>> PostOrder(int? voucherId, int? points )
         {
-            _context.Orders.Add(order);
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var user = await _context.Users.FindAsync(userId);
+
+            var total = await _context.Carts.Include(cart => cart.Product)
+                                            .Where(cart => cart.UserId == userId)
+                                            .SumAsync(cart => cart.Product.Price * cart.Quantity);
+
+
+            var userPoint = user.Points; // get user's point from database
+            if (points != null && voucherId != null) // cannot use points deduction and voucher at the same time
+                return BadRequest(new { Error = "Chỉ được chọn một hình thức giảm giá" });
+            if (voucherId == null && points != null)
+            {
+                
+                if (points > userPoint || points < 0)   // using point deduction
+                    return BadRequest(new { Error = "Điểm không hợp lệ" });
+                else
+                {
+                    if(points > total)   // minimum total is 0
+                    {
+                        user.Points -= (int)total;
+                        total = 0;
+                    }
+                    else
+                    {
+                        total -= (int)points;
+                        user.Points -= (int)points;
+                    }
+                    
+                    
+                }                    
+            }
+            
+            if (voucherId != null && points == null) // using voucher
+            {
+                var voucher = await _context.Vouchers.FindAsync(voucherId);
+                if (voucher == null)
+                    return NotFound(new {Error = "Không tìm thấy voucher" });
+                if (userPoint < voucher.Points)
+                    return BadRequest(new { Error = "Không đủ điều kiện áp dụng voucher" });
+                if(voucher.Quantity == 0)
+                    return BadRequest(new {Error = "Không còn voucher" });
+
+                total = total * (decimal)(100 - voucher.Value) / 100;
+                voucher.Quantity--;  // decrease number of voucher in database
+            }
+
+
+            var newOrder = new Order
+            {
+                PurchasedDate = DateTime.Now,
+                Total = total,
+                VoucherId = voucherId,
+                UserId = userId
+            };
+            _context.Orders.Add(newOrder);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+            var carts = await _context.Carts.Include(cart => cart.Product).Where(cart => cart.UserId == userId).ToListAsync();
+
+            foreach (var c in carts)
+                c.Product.Stock -= c.Quantity; // decrease each product's stock in database
+            
+
+            if (carts.Count == 0) // no product in cart
+                return BadRequest(new { Error = "Vui lòng chọn sản phẩm trước" });
+            var newOrderProducts = carts.Select(cart => new OrderProduct
+            {
+                OrderId = newOrder.Id,
+                ProductId = cart.ProductId,
+                UnitPrice = cart.Product.Price,
+                Quantity = cart.Quantity
+            });
+
+            _context.OrderProducts.AddRange(newOrderProducts);
+
+             _context.Carts.RemoveRange(carts);  // remove product in cart
+            await _context.SaveChangesAsync();
+
+
+            //return CreatedAtAction("GetDetailOrder", new { OrderId = newOrder.Id });
+            return Ok("Đơn hàng đang được xử lý, cảm ơn quý khách");
         }
+
+
+
+
+
+
 
         // DELETE: api/Orders/5
         [HttpDelete("{id}")]
@@ -143,11 +232,12 @@ namespace CandleInTheWind.API.Controllers
             return NoContent();
         }
 
+        
         private bool OrderExists(int id)
         {
             return _context.Orders.Any(e => e.Id == id);
         }
-        */
+        
 
         private SimpleOrderDTO toSimpleDTO(Order order)
         {
