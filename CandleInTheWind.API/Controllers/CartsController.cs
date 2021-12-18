@@ -204,6 +204,30 @@ namespace CandleInTheWind.API.Controllers
             return NoContent();
         }
 
+        [HttpGet("CheckVoucher/{voucherId}")]
+        public async Task<ActionResult> CheckVoucher(int? voucherId)
+        {
+            if (voucherId == null)
+                return BadRequest(new { Error = "Chưa chọn mã giảm giá" });
+            var voucher = await _context.Vouchers.FindAsync((int)voucherId);
+            if (voucher == null)
+                return NotFound(new { Error = "Không tìm thấy mã giảm giá" });
+
+            var userClaimId = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userClaimId == null)
+                return BadRequest(new { Error = "Không xác định được người dùng" });
+            var userId = int.Parse(userClaimId.Value);
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user.Points < voucher.Points)
+                return Ok(new { success = false, totalPrice = -1 });
+
+            var total = _context.Carts.Include(cart => cart.Product)
+                                      .Where(cart => cart.UserId == userId)
+                                      .Sum(cart => cart.Quantity * cart.Product.Price);
+            return Ok(new { success = true, totalPrice = total * (decimal)(100 - voucher.Value) / 100});
+        }
+
         private bool CartExists(int userId, int productId)
         {
             return _context.Carts.Any(cart => cart.UserId == userId && cart.ProductId == productId);
