@@ -210,10 +210,50 @@ namespace CandleInTheWind.API.Controllers
             return Ok("Đơn hàng đang được xử lý, cảm ơn quý khách");
         }
 
+        [HttpPut("MyOrder/{OrderId}"), Authorize]
+        public async Task<IActionResult> CancelOrder(int OrderId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
 
+            var userId = int.Parse(userIdClaim.Value);
 
+            var user = await _context.Users.FindAsync(userId);
 
+            var order = await _context.Orders.Include(order => order.User)
+                                             .Include(order => order.Voucher)
+                                             .FirstOrDefaultAsync(order => order.Id == OrderId && order.UserId == userId);
 
+            if(order == null)
+                return NotFound(new {Error = "Không tìm thấy đơn hàng" });
+
+            if (order.Status == OrderStatus.Approved || order.Status == OrderStatus.NotApproved || order.Status == OrderStatus.Canceled)
+                return BadRequest(new { Error = "Không thể huỷ đơn hàng" });
+            else
+            {
+                order.Status = OrderStatus.Canceled;
+                if (order.VoucherId != null) // return the voucher if used
+                    order.Voucher.Quantity++;
+
+                var orderProducts = await _context.OrderProducts.Include(op => op.Product)
+                                                                .Where(op => op.OrderId == OrderId)
+                                                                .ToListAsync();
+
+                decimal total = 0; // total price before deduction
+                foreach (var p in orderProducts) // return all the product in the order
+                {
+                    p.Product.Stock += p.Quantity;
+                    total += p.Product.Price * p.Quantity;
+                }
+                if(order.VoucherId == null)
+                    user.Points += (int)(total - order.Total); //return points for the users 
+
+                await _context.SaveChangesAsync(); // Save changes (product, voucher?, points?, orderStatus)
+
+                return Ok("Huỷ đơn hàng thành công");
+            }
+        }
 
 
         // DELETE: api/Orders/5
@@ -274,10 +314,6 @@ namespace CandleInTheWind.API.Controllers
                 VoucherValue = order.Voucher?.Value
             };
         }
-
-
-
-
 
     }
 }
