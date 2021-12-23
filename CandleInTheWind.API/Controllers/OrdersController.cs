@@ -122,6 +122,7 @@ namespace CandleInTheWind.API.Controllers
 
                 total = total * (decimal)(100 - voucher.Value) / 100;
                 voucher.Quantity--;  // decrease number of voucher in database
+                user.Points -= voucher.Points; // decrease user point
             }
 
             var newOrder = new Order
@@ -184,7 +185,11 @@ namespace CandleInTheWind.API.Controllers
             {
                 order.Status = OrderStatus.Canceled;
                 if (order.VoucherId != null) // return the voucher if used
+                {
+
                     order.Voucher.Quantity++;
+                    user.Points += order.Voucher.Points; //return used point
+                }
 
                 var orderProducts = await _context.OrderProducts.Include(op => op.Product)
                                                                 .Where(op => op.OrderId == orderId)
