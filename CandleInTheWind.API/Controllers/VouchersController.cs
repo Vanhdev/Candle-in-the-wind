@@ -1,14 +1,13 @@
-﻿using CandleInTheWind.API.Models.Vouchers;
+﻿using CandleInTheWind.API.Extensions;
+using CandleInTheWind.API.Models.Vouchers;
 using CandleInTheWind.Data;
 using CandleInTheWind.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CandleInTheWind.API.Controllers
@@ -25,18 +24,21 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
+        // GET: api/Vouchers/GetAll
         [HttpGet("GetAll")]
         public ActionResult GetAllVouchers()
         {
             return Ok(_context.Vouchers);
         }
 
+        // GET: api/Vouchers
         [HttpGet]
         public async Task<ActionResult> GetVouchers()
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest();
+
             var userId = int.Parse(userIdClaim.Value);
 
             var user = await _context.Users.FindAsync(userId);
@@ -47,21 +49,9 @@ namespace CandleInTheWind.API.Controllers
                                                      voucher.Quantity > 0)
                                    .ToListAsync();
 
-            var voucherResponses = vouchers.Select(voucher => ToVoucherDTO(voucher));
+            var voucherResponses = vouchers.Select(voucher => voucher.ToDTO());
 
             return Ok(voucherResponses);
-        }
-
-        private VoucherDTO ToVoucherDTO(Voucher voucher)
-        {
-            return new VoucherDTO()
-            {
-                Id = voucher.Id,
-                Name = voucher.Name,
-                Expired = voucher.Expired,
-                Value = voucher.Value,
-                Points = voucher.Points,
-            };
         }
     }
 }

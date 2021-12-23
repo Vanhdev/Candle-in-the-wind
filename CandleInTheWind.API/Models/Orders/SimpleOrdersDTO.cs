@@ -18,36 +18,5 @@ namespace CandleInTheWind.API.Models.Orders
         public IEnumerable<string> ProductName { get; set; }
 
         public DateTime PurchaseDate { get; set; }
-
-
-        /*
-        private string toStatusName(OrderStatus status)
-        {
-            switch (status)
-            {
-                case OrderStatus.Pending : return "Đang xử lý";
-                case OrderStatus.Approved : return "Đã duyệt";
-                case OrderStatus.Canceled : return "Đã huỷ";
-                case OrderStatus.NotApproved : return "Không được duyệt";
-                    default : return "";
-            }
-        } */
     }
-
-    public static class getEnumNames
-    {
-        public static string toStatusName(this OrderStatus status)
-        {
-            switch (status)
-            {
-                case OrderStatus.Pending: return "Đang xử lý";
-                case OrderStatus.Approved: return "Đã duyệt";
-                case OrderStatus.Canceled: return "Đã huỷ";
-                case OrderStatus.NotApproved: return "Không được duyệt";
-                default: return "";
-            }
-        }
-    }
-
-    
 }
