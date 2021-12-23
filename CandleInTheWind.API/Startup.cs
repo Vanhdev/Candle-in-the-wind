@@ -57,6 +57,16 @@ namespace CandleInTheWind.API
                 };
             });
 
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(config =>
+                {
+                    config.WithOrigins(Configuration["AllowedHosts"])
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGen(c =>
             {
@@ -77,6 +87,8 @@ namespace CandleInTheWind.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
 

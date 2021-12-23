@@ -9,11 +9,10 @@ namespace CandleInTheWind.API.Models.Users
 {
     public class ProfileDTO : UserDTO
     {
-        [Required]
-        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
 
-        [Required]
         public int Points { get; set; }
+
+        public string GenderName { get; set; }
     }
 }

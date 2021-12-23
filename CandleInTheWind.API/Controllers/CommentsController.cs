@@ -10,6 +10,7 @@ using CandleInTheWind.Models;
 using CandleInTheWind.API.Models.Comments;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using CandleInTheWind.API.Extensions;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -24,42 +25,33 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
-        // GET: api/Comments
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CommentDTO>>> GetComments()
-        {
-            var comments = await _context.Comments.Include(comment => comment.User).Include(comment => comment.Post).ToListAsync();
-            var responseComments = comments.Select(comment => toDTO(comment));
-            return Ok(responseComments);
-        }
-
         // GET: api/Comments/5
-        [HttpGet("{PostId}")]
-        public async Task<ActionResult<CommentDTO>> GetComment(int PostId)
+        [HttpGet("{postId}")]
+        public async Task<ActionResult> GetComment(int postId)
         {
-            var post = _context.Posts.FirstOrDefault(post => post.Id == PostId && post.Status == PostStatus.Approved);
+            var post = _context.Posts.FirstOrDefault(post => post.Id == postId && post.Status == PostStatus.Approved);
             if (post == null) return NotFound();
 
             var comments = await _context.Comments.Include(comment => comment.User)
-                                                  .Where(comment => comment.Post.Id == PostId)
+                                                  .Where(comment => comment.Post.Id == postId)
                                                   .ToListAsync();
 
-            var responseComments = comments.Select(comment => toDTO(comment));
+            var responseComments = comments.Select(comment => comment.ToDTO());
 
             return Ok(responseComments);
         }
 
         //Delete comment
+        // DELETE: api/Comments/Post/1/Comment/4
         [HttpDelete("Post/{PostId}/Comment/{CommentId}")]
         [Authorize]
-        public async Task<IActionResult> DeleteComment(int PostId, int CommentId)
+        public async Task<IActionResult> DeleteComment(int postId, int commentId)
         {
-
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest();
 
-            var post = await _context.Posts.FindAsync(PostId);
+            var post = await _context.Posts.FindAsync(postId);
 
             if (post == null) 
                 return NotFound(new {Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });    
@@ -68,8 +60,8 @@ namespace CandleInTheWind.API.Controllers
             
             var comment = await _context.Comments.Include(comment => comment.Post)
                                                  .Include(comment => comment.User)
-                                                 .Where(comment => comment.Post.Id == PostId && comment.User.Id == userId)
-                                                 .FirstOrDefaultAsync(comment => comment.Id == CommentId);
+                                                 .Where(comment => comment.Post.Id == postId && comment.User.Id == userId)
+                                                 .FirstOrDefaultAsync(comment => comment.Id == commentId);
 
             if (comment == null)
             {
@@ -83,15 +75,16 @@ namespace CandleInTheWind.API.Controllers
         }
 
         //Edit comment
+        // PUT: api/Comments/Post/1/Comment/4
         [HttpPut("Post/{PostId}/Comment/{CommentId}")]
         [Authorize]
-        public async Task<IActionResult> PutComment(int PostId, int CommentId, [FromBody] string Content)
+        public async Task<IActionResult> PutComment(int postId, int commentId, [FromBody] string content)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest();
 
-            var post = await _context.Posts.FindAsync(PostId);
+            var post = await _context.Posts.FindAsync(postId);
 
             if (post == null)
                 return NotFound(new { Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
@@ -100,13 +93,13 @@ namespace CandleInTheWind.API.Controllers
 
             var comment = await _context.Comments.Include(comment => comment.Post)
                                                  .Include(comment => comment.User)
-                                                 .Where(comment => comment.Post.Id == PostId && comment.User.Id == userId)
-                                                 .FirstOrDefaultAsync(comment => comment.Id == CommentId);
+                                                 .Where(comment => comment.Post.Id == postId && comment.User.Id == userId)
+                                                 .FirstOrDefaultAsync(comment => comment.Id == commentId);
 
             if(comment == null)  
                 return NotFound();
 
-            comment.Content = Content;
+            comment.Content = content;
             _context.Entry(comment).State = EntityState.Modified;
 
             try
@@ -115,7 +108,7 @@ namespace CandleInTheWind.API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CommentExists(CommentId))
+                if (!CommentExists(commentId))
                 {
                     return NotFound();
                 }
@@ -128,24 +121,23 @@ namespace CandleInTheWind.API.Controllers
             return NoContent();
         }
 
-        
-        [HttpPost("Post/{PostId}/Comments")]
+        // POST: api/Comments/1
+        [HttpPost("{postId}")]
         [Authorize]
-        public async Task<ActionResult<Comment>> AddComment([FromRoute]int PostId,[FromBody] CommentCreateDTO dto)
+        public async Task<ActionResult> AddComment([FromRoute]int postId, [FromBody] CommentCreateDTO dto)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest();
             
             var userId = int.Parse(userIdClaim.Value);
-            var post = await _context.Posts.FindAsync(PostId);
+            var post = await _context.Posts.FindAsync(postId);
             
             if (post == null)
                 return NotFound(new { Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
 
             if (post.Commentable == false)
-                return Ok("Bài viết đã khoá bình luận");
-
+                return BadRequest(new { Error = "Bài viết đã khoá bình luận" });
 
             var comment = new Comment
             {
@@ -154,27 +146,11 @@ namespace CandleInTheWind.API.Controllers
                 UserId = userId,
             };
             
-
-
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
-            //return CreatedAtAction("GetComment", new { id = comment.Id }, comment);
-            return Ok("Tao cmt thanh cong!");
-        }
-        
-        
-        private CommentDTO toDTO(Comment comment)
-        {
-            return new CommentDTO
-            {
-                Id = comment.Id,
-                UserId = comment.User.Id,
-                UserName = comment.User.UserName,
-                PostId = comment.Post.Id,
-                Content = comment.Content,
-                Time = comment.Time
-            };
+            //return CreatedAtAction(nameof(GetComment), new { postId = comment.Id });
+            return Ok(new { Message = "Tạo comment thành công!" });
         }
 
         private bool CommentExists(int id)
