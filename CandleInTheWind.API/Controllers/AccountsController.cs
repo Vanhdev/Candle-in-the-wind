@@ -10,7 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,7 +22,6 @@ namespace CandleInTheWind.API.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
-        //private readonly UserManager<User> _userManager;
 
         public AccountsController(ApplicationDbContext context, IConfiguration config)
         {
@@ -31,6 +29,7 @@ namespace CandleInTheWind.API.Controllers
             _config = config;
         }
 
+        // POST: api/Accounts/SignUp
         [HttpPost]
         [Route("SignUp")]
         public async Task<ActionResult> SignUp([FromBody]SignUpDTO dto)
@@ -40,14 +39,14 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new AccountResponseDTO()
                 {
                     Success = true,
-                    ErrorMessage = "Bạn đang đăng nhập"
+                    ErrorMessage = "Bạn đã đăng nhập"
                 });
             }
 
             // check xem các trường thông tin có hợp lệ ko
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Error", "Đăng ký không thành công");
+                ModelState.AddModelError("error", "Đăng ký không thành công");
                 return BadRequest(ModelState);
             }
 
@@ -90,6 +89,7 @@ namespace CandleInTheWind.API.Controllers
             });
         }
 
+        // POST: api/Accounts/SignIn
         [HttpPost]
         [Route("SignIn")]
         public async Task<ActionResult> SignIn([FromBody]SignInDTO dto)
@@ -99,20 +99,20 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new AccountResponseDTO()
                 {
                     Success = true,
-                    ErrorMessage = "Bạn đang đăng nhập"
+                    ErrorMessage = "Bạn đã đăng nhập"
                 });
             }
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Error", "Đăng nhập thất bại");
+                ModelState.AddModelError("error", "Đăng nhập thất bại");
                 return BadRequest(ModelState);
             }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
             {
-                ModelState.AddModelError("Error", "Email hoặc mật khẩu chưa chính xác");
+                ModelState.AddModelError("error", "Email hoặc mật khẩu chưa chính xác");
                 return BadRequest(ModelState);
             }
 
@@ -120,7 +120,7 @@ namespace CandleInTheWind.API.Controllers
             var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
-                ModelState.AddModelError("Error", "Email hoặc mật khẩu chưa chính xác");
+                ModelState.AddModelError("error", "Email hoặc mật khẩu chưa chính xác");
                 return BadRequest(ModelState);
             }
 
@@ -153,7 +153,7 @@ namespace CandleInTheWind.API.Controllers
             {
                 Issuer = _config["Jwt:ValidIssuer"],
                 Audience = _config["Jwt:ValidAudience"],
-                Expires = DateTime.UtcNow.AddMinutes(15),
+                Expires = DateTime.UtcNow.AddHours(12),
                 Subject = new ClaimsIdentity(authClaims),
                 SigningCredentials = new SigningCredentials(authSignKey, SecurityAlgorithms.HmacSha256Signature),
             });
