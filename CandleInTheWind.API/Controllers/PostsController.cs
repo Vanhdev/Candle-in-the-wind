@@ -22,8 +22,8 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
-        // GET: api/Posts
-        [HttpGet]
+        // GET: api/Posts/AllPosts
+        [HttpGet("AllPosts")]
         public async Task<ActionResult> GetAllApprovedPosts()
         {
             var posts = await _context.Posts.Include(posts => posts.User)
@@ -34,9 +34,9 @@ namespace CandleInTheWind.API.Controllers
             return Ok(postsResponse);
         }
 
-        // GET: api/Posts/pageIndex=1&pageSize=5
-        [HttpGet("{pageIndex}")]
-        public async Task<ActionResult> GetPagedApprovedPost(int pageIndex = 1, int pageSize = 5)
+        // GET: api/Posts?pageIndex=1&pageSize=5
+        [HttpGet()]
+        public async Task<ActionResult> GetPagedApprovedPost([FromQuery]int pageIndex = 1, [FromQuery]int pageSize = 5)
         {
             if(pageIndex < 1) pageIndex = 1;
             if(pageSize < 0) pageSize = 1;
@@ -63,6 +63,18 @@ namespace CandleInTheWind.API.Controllers
                     TotalPages = totalPages,
                     Posts = responsePosts,
                 });
+        }
+
+        //GET: api/Posts/1
+        [HttpGet("{postID}")]
+        public async Task<ActionResult> GetPost(int postID)
+        {
+            var post = await _context.Posts.Include(post => post.User)
+                                           .Where(post => post.Status == PostStatus.Approved)
+                                           .FirstOrDefaultAsync(post => post.Id == postID);
+            if (post == null) return NotFound(new {Error = "Không tìm thấy bài viết" });
+
+            return Ok(post.ToDTO(_context));
         }
         
         // GET: api/Posts/MyPost
