@@ -39,7 +39,7 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new AccountResponseDTO()
                 {
                     Success = true,
-                    ErrorMessage = "Bạn đã đăng nhập"
+                    Error = "Bạn đã đăng nhập"
                 });
             }
 
@@ -56,7 +56,7 @@ namespace CandleInTheWind.API.Controllers
                 return Conflict(new AccountResponseDTO()
                 {
                     Success = false,
-                    ErrorMessage = "Email này đã được đăng ký. Vui lòng sử dụng email khác"
+                    Error = "Email này đã được đăng ký. Vui lòng sử dụng email khác"
                 });
 
             // tạo user mới
@@ -77,15 +77,12 @@ namespace CandleInTheWind.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new AccountResponseDTO()
                 {
                     Success = false,
-                    ErrorMessage = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại"
+                    Error = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại"
                 });
-
-            var token = GenerateToken(newUser);
 
             return Ok(new AccountResponseDTO()
             {
                 Success = true,
-                AccessToken = token,
             });
         }
 
@@ -99,7 +96,7 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new AccountResponseDTO()
                 {
                     Success = true,
-                    ErrorMessage = "Bạn đã đăng nhập"
+                    Error = "Bạn đã đăng nhập"
                 });
             }
 
