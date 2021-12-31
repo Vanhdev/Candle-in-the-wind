@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CandleInTheWind.API.Models.Carts
+﻿namespace CandleInTheWind.API.Models.Carts
 {
     public class CartDTO
     {

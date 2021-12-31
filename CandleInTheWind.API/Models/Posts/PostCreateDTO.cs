@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CandleInTheWind.API.Models.Posts
+﻿namespace CandleInTheWind.API.Models.Posts
 {
     public class PostCreateDTO
     {        
