@@ -15,11 +15,11 @@ namespace CandleInTheWind.API.Models.Users
 
         [Required]
         [DataType(DataType.Password)]
-        [Compare("CurrentPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
-        public string ConfirmCurrentPassword { get; set; }
+        public string NewPassword { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        public string NewPassword { get; set; }
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public string ConfirmNewPassword { get; set; }
     }
 }
