@@ -78,7 +78,7 @@ namespace CandleInTheWind.API.Controllers
         // PUT: api/Comments/Post/1/Comment/4
         [HttpPut("Post/{PostId}/Comment/{CommentId}")]
         [Authorize]
-        public async Task<IActionResult> PutComment(int postId, int commentId, [FromBody] string content)
+        public async Task<IActionResult> PutComment(int postId, int commentId, [FromBody] CommentCreateDTO dto)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -99,7 +99,7 @@ namespace CandleInTheWind.API.Controllers
             if(comment == null)  
                 return NotFound();
 
-            comment.Content = content;
+            comment.Content = dto.Content;
             _context.Entry(comment).State = EntityState.Modified;
 
             try
