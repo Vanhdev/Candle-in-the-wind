@@ -40,7 +40,7 @@ namespace CandleInTheWind.API.Controllers
                                               .Where(order => order.User.Id == userId)
                                               .ToListAsync();
 
-            var responseOrders = orders.Select(order => order.ToSimpleOrderDTO());
+            var responseOrders = orders.Select(order => order.ToOrderDTO());
 
             return Ok(responseOrders);
         }
@@ -64,7 +64,7 @@ namespace CandleInTheWind.API.Controllers
             if(order == null) 
                 return NotFound(new {Error = "Không tìm thấy đơn hàng" });
 
-            var responseOrder = order.ToDTO();
+            var responseOrder = order.ToOrderDetailDTO();
             return Ok(responseOrder);
 
         }
@@ -88,14 +88,14 @@ namespace CandleInTheWind.API.Controllers
 
 
             var userPoint = user.Points; // get user's point from database
-            if (points != null && voucherId != null) // cannot use points deduction and voucher at the same time
+            if (points != null && points > 0 && voucherId != null) // cannot use points deduction and voucher at the same time
                 return BadRequest(new { Error = "Chỉ được chọn một hình thức giảm giá" });
             if (voucherId == null && points != null)
             {
                 
                 if (points > userPoint || points < 0)   // using point deduction
                     return BadRequest(new { Error = "Điểm không hợp lệ" });
-                else
+                else if (points > 0)
                 {
                     if(points > total)   // minimum total is 0
                     {
@@ -110,7 +110,7 @@ namespace CandleInTheWind.API.Controllers
                 }                    
             }
             
-            if (voucherId != null && points == null) // using voucher
+            if (voucherId != null && (points == null || points == 0)) // using voucher
             {
                 var voucher = await _context.Vouchers.FindAsync(voucherId);
                 if (voucher == null)

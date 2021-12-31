@@ -14,9 +14,6 @@ namespace CandleInTheWind.API.Models.Users
         [StringLength(50)]
         public string UserName { get; set; }
 
-        [DataType(DataType.PhoneNumber)]
-        public string PhoneNumber { get; set; }
-
         public DateTime? DateOfBirth { get; set; }
 
         [Required]

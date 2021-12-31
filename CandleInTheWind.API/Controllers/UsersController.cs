@@ -67,7 +67,6 @@ namespace CandleInTheWind.API.Controllers
 
             
             user.UserName = dto.UserName;
-            user.PhoneNumber = dto.PhoneNumber;
             user.DateOfBirth = dto.DateOfBirth;
             user.Gender = dto.Gender;
 
