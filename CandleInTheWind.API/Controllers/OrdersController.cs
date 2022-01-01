@@ -65,8 +65,20 @@ namespace CandleInTheWind.API.Controllers
                 return NotFound(new {Error = "Không tìm thấy đơn hàng" });
 
             var responseOrder = order.ToOrderDetailDTO();
-            return Ok(responseOrder);
 
+            if (order.Voucher == null)
+            {
+                var orderProducts = await _context.OrderProducts.Include(op => op.Product)
+                                                                .Where(op => op.OrderId == orderId)
+                                                                .ToListAsync();
+
+                decimal total = 0; // total price before deduction
+                foreach (var p in orderProducts) // return all the product in the order
+                    total += p.Product.Price * p.Quantity;
+
+                responseOrder.Points = (int)(total - order.Total);
+            }
+            return Ok(responseOrder);
         }
 
         
