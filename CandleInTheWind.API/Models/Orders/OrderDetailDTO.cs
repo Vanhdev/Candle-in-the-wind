@@ -15,5 +15,7 @@ namespace CandleInTheWind.API.Models.Orders
         public double? VoucherValue { get; set; }
 
         public string VoucherName { get; set; } = string.Empty;
+
+        public int Points = 0;
     }
 }

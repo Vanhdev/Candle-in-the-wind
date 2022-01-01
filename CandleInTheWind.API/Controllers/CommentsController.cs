@@ -56,6 +56,9 @@ namespace CandleInTheWind.API.Controllers
             if (post == null) 
                 return NotFound(new {Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });    
 
+            if (!post.Commentable)
+                return BadRequest(new { Error = "Bài viết đã bị khóa chức năng bình luận. Không thể xóa bình luận này" });
+
             var userId = int.Parse(userIdClaim.Value);
             
             var comment = await _context.Comments.Include(comment => comment.Post)
@@ -64,9 +67,7 @@ namespace CandleInTheWind.API.Controllers
                                                  .FirstOrDefaultAsync(comment => comment.Id == commentId);
 
             if (comment == null)
-            {
                 return NotFound();
-            }
 
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
@@ -88,6 +89,9 @@ namespace CandleInTheWind.API.Controllers
 
             if (post == null)
                 return NotFound(new { Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
+
+            if (!post.Commentable)
+                return BadRequest(new { Error = "Bài viết đã bị khóa chức năng bình luận. Không thể sửa bình luận này" });
 
             var userId = int.Parse(userIdClaim.Value);
 
