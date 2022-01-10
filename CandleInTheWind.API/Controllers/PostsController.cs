@@ -34,6 +34,40 @@ namespace CandleInTheWind.API.Controllers
             return Ok(postsResponse);
         }
 
+
+        [HttpGet("Search")]
+        public async Task<ActionResult> SearchPost(string searchText = "", int pageIndex = 1, int pageSize = 5)
+        {
+            if (searchText == null) 
+                searchText = "";
+
+            // get all approved post which title contains searchText 
+            var posts = _context.Posts.Include(post => post.User)
+                                      .Where(post => post.Title.Contains(searchText) && post.Status == PostStatus.Approved);
+                                            
+           
+            
+            int count = posts.Count();
+            int totalPages = count / pageSize + ((count % pageSize == 0) ? 0 : 1);
+
+            if (pageIndex > totalPages) pageIndex = 1;
+
+            var postsPerPage = await posts.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
+
+            var responsePosts = postsPerPage.Select(post => post.ToDTO(_context));
+
+            return Ok(
+                new PostFilterDTO
+                {
+                    PageIndex = pageIndex,
+                    PageSize = pageSize,
+                    TotalPages = totalPages,
+                    Posts = responsePosts,
+                });
+
+        }
+
+
         // GET: api/Posts?pageIndex=1&pageSize=5
         [HttpGet()]
         public async Task<ActionResult> GetPagedApprovedPost([FromQuery]int pageIndex = 1, [FromQuery]int pageSize = 5)
