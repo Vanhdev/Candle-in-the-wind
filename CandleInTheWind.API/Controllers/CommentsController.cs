@@ -56,6 +56,9 @@ namespace CandleInTheWind.API.Controllers
             if (post == null) 
                 return NotFound(new {Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });    
 
+            if (!post.Commentable)
+                return BadRequest(new { Error = "Bài viết đã bị khóa chức năng bình luận. Không thể xóa bình luận này" });
+
             var userId = int.Parse(userIdClaim.Value);
             
             var comment = await _context.Comments.Include(comment => comment.Post)
@@ -64,9 +67,7 @@ namespace CandleInTheWind.API.Controllers
                                                  .FirstOrDefaultAsync(comment => comment.Id == commentId);
 
             if (comment == null)
-            {
                 return NotFound();
-            }
 
             _context.Comments.Remove(comment);
             await _context.SaveChangesAsync();
@@ -78,7 +79,7 @@ namespace CandleInTheWind.API.Controllers
         // PUT: api/Comments/Post/1/Comment/4
         [HttpPut("Post/{PostId}/Comment/{CommentId}")]
         [Authorize]
-        public async Task<IActionResult> PutComment(int postId, int commentId, [FromBody] string content)
+        public async Task<IActionResult> PutComment(int postId, int commentId, [FromBody] CommentCreateDTO dto)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -88,6 +89,9 @@ namespace CandleInTheWind.API.Controllers
 
             if (post == null)
                 return NotFound(new { Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
+
+            if (!post.Commentable)
+                return BadRequest(new { Error = "Bài viết đã bị khóa chức năng bình luận. Không thể sửa bình luận này" });
 
             var userId = int.Parse(userIdClaim.Value);
 
@@ -99,7 +103,7 @@ namespace CandleInTheWind.API.Controllers
             if(comment == null)  
                 return NotFound();
 
-            comment.Content = content;
+            comment.Content = dto.Content;
             _context.Entry(comment).State = EntityState.Modified;
 
             try

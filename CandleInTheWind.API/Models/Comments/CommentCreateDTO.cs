@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CandleInTheWind.API.Models.Comments
 {
     public class CommentCreateDTO
     {
+        [Required]
         public string Content { get; set; }
     }
 }

@@ -162,7 +162,7 @@ namespace CandleInTheWind.API.Controllers
         // PUT: api/Posts/MyPost/4
         [HttpPut("MyPost/{PostId}"), Authorize]
 
-        public async Task<ActionResult> TurnOffComment([FromRoute] int postId)
+        public async Task<ActionResult> ChangeCommentableState([FromRoute] int postId)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -179,12 +179,12 @@ namespace CandleInTheWind.API.Controllers
             if (post.Commentable == true)
                 post.Commentable = false;
             else
-                return Ok(new { Message = "Bài viết đã được khoá bình luận" });
+                post.Commentable = true;
+                //return Ok(new { Message = "Bài viết đã được khoá bình luận" });
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
-
+            return Ok(new { Message = $"Chức năng bình luận của bài viết đã được {(post.Commentable ? "mở" : "khóa")}" });
         }
         
         // DELETE: api/Posts/MyPost/4

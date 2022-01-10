@@ -7,11 +7,7 @@ using CandleInTheWind.API.Models.Users;
 using CandleInTheWind.API.Models.Vouchers;
 using CandleInTheWind.Data;
 using CandleInTheWind.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CandleInTheWind.API.Extensions
 {
@@ -21,6 +17,7 @@ namespace CandleInTheWind.API.Extensions
         {
             return new ProfileDTO()
             {
+                Id = user.Id,
                 UserName = user.UserName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
@@ -86,9 +83,25 @@ namespace CandleInTheWind.API.Extensions
             };
         }
 
-        public static OrderDTO ToDTO(this Order order)
+        public static OrderProductDTO ToDTO(this OrderProduct orderProduct)
         {
-            return new OrderDTO
+            int id = orderProduct.ProductId ?? 0;
+            string name = orderProduct.Product?.Name ?? string.Empty;
+            string imageUrl = orderProduct.Product?.ImageUrl ?? string.Empty;
+
+            return new OrderProductDTO()
+            {
+                Id = id,
+                Name = name,
+                UnitPrice = orderProduct.UnitPrice,
+                Quantity = orderProduct.Quantity,
+                ImageUrl = imageUrl
+            };
+        }
+
+        public static OrderDetailDTO ToOrderDetailDTO(this Order order)
+        {
+            return new OrderDetailDTO
             {
                 UserId = order.UserId,
                 UserName = order.User.UserName,
@@ -97,20 +110,16 @@ namespace CandleInTheWind.API.Extensions
                 Total = order.Total,
                 Status = order.Status,
                 StatusName = order.Status.GetEnumName(),
-                ProductName = order.OrderProducts.Select(op => op.Product.Name),
-                ProductIDs = order.OrderProducts.Select(op => (int)op.ProductId),
-                UnitPrices = order.OrderProducts.Select(op => op.Product.Price),
-                Quantity = order.OrderProducts.Select(op => op.Quantity),
-                ProductImageUrls = order.OrderProducts.Select(op => op.Product.ImageUrl),
+                Products = order.OrderProducts.Select(op => op.ToDTO()),
                 VoucherId = order.Voucher?.Id,
                 VoucherName = order.Voucher?.Name,
                 VoucherValue = order.Voucher?.Value
             };
         }
 
-        public static SimpleOrderDTO ToSimpleOrderDTO(this Order order)
+        public static OrderDTO ToOrderDTO(this Order order)
         {
-            return new SimpleOrderDTO
+            return new OrderDTO
             {
                 Id = order.Id,
                 PurchaseDate = order.PurchasedDate,
@@ -121,6 +130,7 @@ namespace CandleInTheWind.API.Extensions
             };
         }
 
+        
         public static PostDTO ToDTO(this Post post, ApplicationDbContext context)
         {
             var postID = post.Id;
