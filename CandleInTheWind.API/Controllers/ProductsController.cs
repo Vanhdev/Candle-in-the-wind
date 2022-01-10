@@ -108,5 +108,17 @@ namespace CandleInTheWind.API.Controllers
                 PageIndex = pageIndex,
             });
         }
+
+        [HttpGet("SpecialProduct")]
+        public async Task<ActionResult> GetSpecialProduct()
+        {
+            var ids = new[]{ 18, 13, 12, 8};
+            var products = await _context.Products
+                                        .Include(product => product.Category)
+                                        .Where(product => ids.Contains(product.Id)).ToListAsync();
+
+            var productResponse = products.Select(product => product.ToDTO());
+            return Ok(productResponse);
+        }
     }
 }
