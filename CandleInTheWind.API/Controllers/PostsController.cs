@@ -38,6 +38,11 @@ namespace CandleInTheWind.API.Controllers
         [HttpGet("Search")]
         public async Task<ActionResult> SearchPost(string searchText = "", int pageIndex = 1, int pageSize = 5)
         {
+            if (pageSize <= 0) 
+                pageSize = 5;
+            if (pageIndex <= 0) 
+                pageIndex = 1;
+
             if (searchText == null) 
                 searchText = "";
 
