@@ -13,6 +13,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Mail;
+using System.Net;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -58,6 +60,17 @@ namespace CandleInTheWind.API.Controllers
                     Success = false,
                     Error = "Email này đã được đăng ký. Vui lòng sử dụng email khác"
                 });
+
+            // check xem ngày sinh có hợp lệ không
+            if (dto.DateOfBirth != null)
+            {
+                if (dto.DateOfBirth >= DateTime.Now)
+                    return BadRequest(new AccountResponseDTO()
+                    {
+                        Success = false,
+                        Error = "Ngày sinh của bạn không được bằng hoặc sau ngày hiện tại"
+                    });
+            }
 
             // tạo user mới
             var newUser = new User()
@@ -121,7 +134,7 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var token = GenerateToken(user);
+            var token = GenerateToken(user, new TimeSpan(12, 0, 0));
             return Ok(new AccountResponseDTO()
             {
                 Success = true,
@@ -129,7 +142,7 @@ namespace CandleInTheWind.API.Controllers
             });
         }
 
-        private string GenerateToken(User user)
+        private string GenerateToken(User user, TimeSpan time)
         {
             var authClaims = new List<Claim>()
             {
@@ -150,12 +163,64 @@ namespace CandleInTheWind.API.Controllers
             {
                 Issuer = _config["Jwt:ValidIssuer"],
                 Audience = _config["Jwt:ValidAudience"],
-                Expires = DateTime.UtcNow.AddHours(12),
+                Expires = DateTime.UtcNow.Add(time),
                 Subject = new ClaimsIdentity(authClaims),
                 SigningCredentials = new SigningCredentials(authSignKey, SecurityAlgorithms.HmacSha256Signature),
             });
 
             return tokenHandler.WriteToken(token);
+        }
+
+        [HttpPost("ForgetPassword")]
+        public async Task<ActionResult> ForgetPassword(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return BadRequest(new { Error = "Email không hợp lệ" });
+
+            var user = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+            if (user == null)
+                return BadRequest(new { Error = "Email này chưa từng đăng ký" });
+
+            var token = GenerateToken(user, new TimeSpan(0, 5, 0));
+
+            var link = $"https://candle-in-the-wind.herokuapp.com/forgetpassword?token={token}";
+            var bodyMail = $"<p>Bạn đã sử dụng chức năng quên mật khẩu. Đây là <a href=\"{link}\">link reset lại mật khẩu</a>. Link này chỉ có thời hạn 5 phút. Nếu bạn không phải là người sử dụng chắc năng quên mật khẩu, hãy bỏ email này.</p>";
+
+            var sendingMailResult = await SendMail(bodyMail, email);
+            if (!sendingMailResult)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Error = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại" });
+
+            return Ok(new { Message = "Shop đã gửi link reset mật khẩu đến email của bạn. Vui lòng kiểm tra email." });
+        }
+
+        private async Task<bool> SendMail(string body, string address)
+        {
+            var smtp = new SmtpClient()
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                Credentials = new NetworkCredential("mailsenderforOSproject@gmail.com", "mailsenderforOSproject2021"),
+                EnableSsl = true,
+            };
+
+            var mail = new MailMessage()
+            {
+                From = new MailAddress("mailsenderforOSproject@gmail.com"),
+                Subject = "Link reset mật khẩu - CandleInTheWind shop",
+                Body = body,
+                IsBodyHtml = true,
+            };
+            mail.To.Add(address);
+
+            try
+            {
+                await smtp.SendMailAsync(mail);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

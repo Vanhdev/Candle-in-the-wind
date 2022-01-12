@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using CandleInTheWind.API.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using CandleInTheWind.API.Extensions;
+using System;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -54,7 +55,14 @@ namespace CandleInTheWind.API.Controllers
                 ModelState.AddModelError("Error", "Dữ liệu không hợp lệ");
                 return BadRequest(ModelState);
             }
-                
+
+            // check xem ngày sinh có hợp lệ không
+            if (dto.DateOfBirth != null)
+            {
+                if (dto.DateOfBirth >= DateTime.Now)
+                    return BadRequest(new { Error = "Ngày sinh của bạn không được bằng hoặc sau ngày hiện tại" });
+            }
+
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest(new { Error = "Không xác định được người dùng" });
