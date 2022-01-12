@@ -23,26 +23,42 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
-        // GET: api/Orders/MyOrders
+        // GET: api/Orders/MyOrders?pageIndex=1&pageSize=5
         [HttpGet("MyOrders")]
         [Authorize]
-        public async Task<ActionResult> GetMyOrders()
+        public async Task<ActionResult> GetMyOrders([FromQuery]int pageIndex = 1, [FromQuery]int pageSize = 5)
         {
+            if (pageSize <= 0) 
+                pageSize = 5;
+            if (pageIndex <= 0) 
+                pageIndex = 1;
+
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest();
             
             var userId = int.Parse(userIdClaim.Value);
 
-            var orders = await _context.Orders.Include(order => order.User)
-                                              .Include(order => order.OrderProducts) //doi tuong la Order
-                                              .ThenInclude(op => op.Product) // doi tuong se la OrderProduct
-                                              .Where(order => order.User.Id == userId)
-                                              .ToListAsync();
+            var orders = _context.Orders.Include(order => order.User)
+                                        .Include(order => order.OrderProducts) //doi tuong la Order
+                                        .ThenInclude(op => op.Product) // doi tuong se la OrderProduct
+                                        .Where(order => order.User.Id == userId);
 
-            var responseOrders = orders.Select(order => order.ToOrderDTO());
+            int count = orders.Count();
+            int totalPages = count / pageSize + ((count % pageSize == 0) ? 0 : 1);
+            if (pageIndex > totalPages)
+                pageIndex = 1;
 
-            return Ok(responseOrders);
+            var ordersPerPage = await orders.OrderByDescending(order => order.Id).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
+            var responseOrders = ordersPerPage.Select(order => order.ToOrderDTO());
+
+            return Ok(new OrderFilterDTO()
+            {
+                Orders = responseOrders,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                PageIndex = pageIndex,
+            });
         }
 
         // GÊT: api/Orders/MyOrders/1
