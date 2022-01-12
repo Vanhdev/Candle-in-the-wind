@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.Mail;
 using System.Net;
+using CandleInTheWind.API.Helpers;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -172,7 +173,7 @@ namespace CandleInTheWind.API.Controllers
         }
 
         [HttpPost("ForgetPassword")]
-        public async Task<ActionResult> ForgetPassword(string email)
+        public async Task<ActionResult> ForgetPassword(string email, [FromServices]MailSender mailSender)
         {
             if (string.IsNullOrEmpty(email))
                 return BadRequest(new { Error = "Email không hợp lệ" });
@@ -186,41 +187,11 @@ namespace CandleInTheWind.API.Controllers
             var link = $"https://candle-in-the-wind.herokuapp.com/forgetpassword?token={token}";
             var bodyMail = $"<p>Bạn đã sử dụng chức năng quên mật khẩu. Đây là <a href=\"{link}\">link reset lại mật khẩu</a>. Link này chỉ có thời hạn 5 phút. Nếu bạn không phải là người sử dụng chắc năng quên mật khẩu, hãy bỏ email này.</p>";
 
-            var sendingMailResult = await SendMail(bodyMail, email);
+            var sendingMailResult = await mailSender.SendMailAsync(bodyMail, email);
             if (!sendingMailResult)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Error = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại" });
 
             return Ok(new { Message = "Shop đã gửi link reset mật khẩu đến email của bạn. Vui lòng kiểm tra email." });
-        }
-
-        private async Task<bool> SendMail(string body, string address)
-        {
-            var smtp = new SmtpClient()
-            {
-                Host = "smtp.gmail.com",
-                Port = 587,
-                Credentials = new NetworkCredential("mailsenderforOSproject@gmail.com", "mailsenderforOSproject2021"),
-                EnableSsl = true,
-            };
-
-            var mail = new MailMessage()
-            {
-                From = new MailAddress("mailsenderforOSproject@gmail.com"),
-                Subject = "Link reset mật khẩu - CandleInTheWind shop",
-                Body = body,
-                IsBodyHtml = true,
-            };
-            mail.To.Add(address);
-
-            try
-            {
-                await smtp.SendMailAsync(mail);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
     }
 }

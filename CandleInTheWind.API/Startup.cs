@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CandleInTheWind.API.Helpers;
 
 namespace CandleInTheWind.API
 {
@@ -66,6 +67,8 @@ namespace CandleInTheWind.API
                           .AllowAnyMethod();
                 });
             });
+
+            services.AddScoped<MailSender>();
 
             services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGen(c =>
