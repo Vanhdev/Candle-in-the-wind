@@ -57,7 +57,7 @@ namespace CandleInTheWind.API.Controllers
 
             if (pageIndex > totalPages) pageIndex = 1;
 
-            var postsPerPage = await posts.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
+            var postsPerPage = await posts.OrderByDescending(post => post.ApprovedAt).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
 
             var responsePosts = postsPerPage.Select(post => post.ToDTO(_context));
 
@@ -87,7 +87,7 @@ namespace CandleInTheWind.API.Controllers
 
             if (pageIndex > totalPages) pageIndex = 1;
 
-            var postsPerPage = await approvedPosts.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
+            var postsPerPage = await approvedPosts.OrderByDescending(post => post.ApprovedAt).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
 
             if (postsPerPage.Count == 0)
                 return NotFound();
