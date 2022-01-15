@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CandleInTheWind.Data;
@@ -10,6 +7,7 @@ using CandleInTheWind.Models;
 using CandleInTheWind.API.Models.Posts;
 using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using CandleInTheWind.API.Extensions;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -24,34 +22,60 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
-        // GET: api/Posts
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostDTO>>> GetAllApprovedPosts()
+        // GET: api/Posts/AllPosts
+        [HttpGet("AllPosts")]
+        public async Task<ActionResult> GetAllApprovedPosts()
         {
-
             var posts = await _context.Posts.Include(posts => posts.User)
                                             .Where(post => post.Status == PostStatus.Approved)
                                             .ToListAsync();
-            // 1 is approved, 2 is not approved, 0 is pending approval.
-
-            var postsResponse = posts.Select(Post => toDTO(Post));
+            
+            var postsResponse = posts.Select(post => post.ToDTO(_context));
             return Ok(postsResponse);
         }
 
-        /*
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<PostDTO>>> getAllPost()
+
+        [HttpGet("Search")]
+        public async Task<ActionResult> SearchPost(string searchText = "", int pageIndex = 1, int pageSize = 5)
         {
-            var posts = await _context.Posts.Include(post => post.User).ToListAsync();
+            if (pageSize <= 0) 
+                pageSize = 5;
+            if (pageIndex <= 0) 
+                pageIndex = 1;
+
+            if (searchText == null) 
+                searchText = "";
+
+            // get all approved post which title contains searchText 
+            var posts = _context.Posts.Include(post => post.User)
+                                      .Where(post => post.Title.Contains(searchText) && post.Status == PostStatus.Approved);
+                                            
+           
             
-            var postResponse = posts.Select(post => toDTO(post));
+            int count = posts.Count();
+            int totalPages = count / pageSize + ((count % pageSize == 0) ? 0 : 1);
 
-            return Ok(postResponse);
-        } 
-        */
+            if (pageIndex > totalPages) pageIndex = 1;
 
-        [HttpGet("{pageIndex}")]
-        public async Task<ActionResult<IEnumerable<PostDTO>>> GetPagedApprovedPost(int pageIndex = 1, int pageSize = 5)
+            var postsPerPage = await posts.OrderByDescending(post => post.ApprovedAt).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
+
+            var responsePosts = postsPerPage.Select(post => post.ToDTO(_context));
+
+            return Ok(
+                new PostFilterDTO
+                {
+                    PageIndex = pageIndex,
+                    PageSize = pageSize,
+                    TotalPages = totalPages,
+                    Posts = responsePosts,
+                });
+
+        }
+
+
+        // GET: api/Posts?pageIndex=1&pageSize=5
+        [HttpGet()]
+        public async Task<ActionResult> GetPagedApprovedPost([FromQuery]int pageIndex = 1, [FromQuery]int pageSize = 5)
         {
             if(pageIndex < 1) pageIndex = 1;
             if(pageSize < 0) pageSize = 1;
@@ -63,12 +87,12 @@ namespace CandleInTheWind.API.Controllers
 
             if (pageIndex > totalPages) pageIndex = 1;
 
-            var postsPerPage = await approvedPosts.Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
+            var postsPerPage = await approvedPosts.OrderByDescending(post => post.ApprovedAt).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
 
             if (postsPerPage.Count == 0)
                 return NotFound();
 
-            var responsePosts = postsPerPage.Select(post => toDTO(post)); 
+            var responsePosts = postsPerPage.Select(post => post.ToDTO(_context)); 
 
             return Ok(
                 new PostFilterDTO
@@ -76,12 +100,24 @@ namespace CandleInTheWind.API.Controllers
                     PageIndex = pageIndex,
                     PageSize = pageSize,
                     TotalPages = totalPages,
-                    PostDTOs = responsePosts,
+                    Posts = responsePosts,
                 });
-
         }
 
-        [HttpGet("mypost")]
+        //GET: api/Posts/1
+        [HttpGet("{postID}")]
+        public async Task<ActionResult> GetPost(int postID)
+        {
+            var post = await _context.Posts.Include(post => post.User)
+                                           .Where(post => post.Status == PostStatus.Approved)
+                                           .FirstOrDefaultAsync(post => post.Id == postID);
+            if (post == null) return NotFound(new {Error = "Không tìm thấy bài viết" });
+
+            return Ok(post.ToDTO(_context));
+        }
+        
+        // GET: api/Posts/MyPost
+        [HttpGet("MyPost")]
         [Authorize]
         public async Task<ActionResult> GetPostByUserId()
         {
@@ -89,92 +125,98 @@ namespace CandleInTheWind.API.Controllers
             if (userIdClaim == null)
                 return BadRequest();
             var userId = int.Parse(userIdClaim.Value);
+
             var myposts = await _context.Posts
                                         .Include(post => post.User)
                                         .Where(post => post.User.Id == userId)
                                         .ToListAsync();
-            var mypostsReponse = myposts.Select(post => toDTO(post));
+            var mypostsReponse = myposts.Select(post => post.ToDTO(_context));
             return Ok(mypostsReponse);
         }
-        /*
-        // GET: api/Posts/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPost(int id)
-        {
-            var post = await _context.Posts.FindAsync(id);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(toDTO(post));
-        }
-        */
-
-
-        /*
+        
+        // POST: api/Posts
         [HttpPost("Posts")]
         [Authorize]
-        public async Task<ActionResult> CreatePost([FromBody]PostDTO dto)
+        public async Task<ActionResult> CreatePost([FromBody]PostCreateDTO dto)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
-            var userNameClaim = User.FindFirst(JwtRegisteredClaimNames.Sub);
             if (userIdClaim == null) return BadRequest();
 
             var userId = int.Parse(userIdClaim.Value);
-            var userName = userIdClaim.Value;
-
             
+            var user = await _context.Users.FindAsync(userId);
 
-            try
+            var createdPost = new Post
             {
-                if (dto == null)
-                    return BadRequest();
-                var createdPost = new Post.
-                {
-                    Commentable = true,
-                    Title = dto.Title,
-                    Content = dto.Content,
-                    Status = 
-                }
-                
-            }
-            catch (Exception)
-            {
-
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from database");
-            }
-
-
-
-        }
-        
-        */
-        
-
-
-
-
-
-        private PostDTO toDTO(Post post)
-        {
-            var postID = post.Id;
-            var Comment_Count = _context.Comments.Count(Comment => Comment.Post.Id == postID);
-            
-            return new PostDTO
-            {
-                Id = postID,
-                Title = post.Title,
-                Content = post.Content,
-                ApprovedAt = post.ApprovedAt,
-                Commentable = post.Commentable,
-                CommentCount = Comment_Count,
-                UserId = post.User.Id,
-                UserName = post.User.UserName,
-                
+                User = user,
+                Title = dto.Title,
+                Content = dto.Content,
+                ApprovedAt = null,
+                Status = PostStatus.NotApprovedYet,
+                Commentable = true,
+                Comments = null
             };
-        }
 
+            _context.Posts.Add(createdPost);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Tạo bài viết thành công" });
+        }
+        
+        // PUT: api/Posts/MyPost/4
+        [HttpPut("MyPost/{PostId}"), Authorize]
+
+        public async Task<ActionResult> ChangeCommentableState([FromRoute] int postId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var post = await _context.Posts.Include(post => post.User)
+                                           .FirstOrDefaultAsync(post => post.User.Id == userId && post.Id == postId);
+
+            if (post == null)
+                return NotFound(new { Error = "Không tìm thấy bài viết" });
+
+            if (post.Commentable == true)
+                post.Commentable = false;
+            else
+                post.Commentable = true;
+                //return Ok(new { Message = "Bài viết đã được khoá bình luận" });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = $"Chức năng bình luận của bài viết đã được {(post.Commentable ? "mở" : "khóa")}" });
+        }
+        
+        // DELETE: api/Posts/MyPost/4
+        [HttpDelete("MyPosts/{PostId}"), Authorize]
+        public async Task<ActionResult> DeletePost ([FromRoute]int postId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var post = await _context.Posts.Include(post => post.User)
+                                           .FirstOrDefaultAsync(post => post.Id == postId && post.User.Id == userId);
+
+            if(post == null)
+                return NotFound(new {Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
+            
+            // delete comments in deleted post
+            var comments = _context.Comments.Where(comment => comment.PostId == postId);
+            if (comments != null)
+                _context.Comments.RemoveRange(comments);
+           
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
+            
+            return NoContent();
+        }
     }   
 }

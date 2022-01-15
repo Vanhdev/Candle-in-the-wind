@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CandleInTheWind.API.Helpers;
 
 namespace CandleInTheWind.API
 {
@@ -57,6 +58,18 @@ namespace CandleInTheWind.API
                 };
             });
 
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(config =>
+                {
+                    config.WithOrigins(Configuration["AllowedHosts"])
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
+            services.AddScoped<MailSender>();
+
             services.AddControllers().AddNewtonsoftJson();
             services.AddSwaggerGen(c =>
             {
@@ -77,6 +90,8 @@ namespace CandleInTheWind.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
 

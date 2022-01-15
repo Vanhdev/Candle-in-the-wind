@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CandleInTheWind.Data;
-using CandleInTheWind.Models;
 using CandleInTheWind.API.Models;
 
 namespace CandleInTheWind.API.Controllers
@@ -24,7 +20,7 @@ namespace CandleInTheWind.API.Controllers
 
         // GET: api/Categories
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
+        public async Task<ActionResult> GetCategories()
         {
             var categories = await _context.Categories.ToListAsync();
             var categoriesResponse = categories.Select(category => new CategoryDTO{ Id = category.Id, Name = category.Name });
@@ -33,7 +29,7 @@ namespace CandleInTheWind.API.Controllers
 
         // GET: api/Categories/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CategoryDTO>> GetCategory(int id)
+        public async Task<ActionResult> GetCategory(int id)
         {
             var category = await _context.Categories.FindAsync(id);
 
@@ -42,7 +38,7 @@ namespace CandleInTheWind.API.Controllers
                 return NotFound();
             }
 
-            return new CategoryDTO() { Id = category.Id, Name = category.Name };
+            return Ok(new CategoryDTO() { Id = category.Id, Name = category.Name });
         }
     }
 }

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CandleInTheWind.Data;
 using CandleInTheWind.Models;
 using CandleInTheWind.API.Models.Products;
+using CandleInTheWind.API.Extensions;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -24,30 +22,32 @@ namespace CandleInTheWind.API.Controllers
 
         // GET: api/Products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts()
+        public async Task<ActionResult> GetProducts()
         {
             var products = await _context.Products.Include(product => product.Category).ToListAsync();
-            var productResponse = products.Select(products => ToProductDTO(products));
+            var productResponse = products.Select(product => product.ToDTO());
             return Ok(productResponse);
         }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDTO>> GetProduct(int id)
+        public async Task<ActionResult> GetProduct(int id)
         {
-            var product = await _context.Products.Include(product => product.Category).FirstOrDefaultAsync(product => product.Id == id);
+            var product = await _context.Products
+                                        .Include(product => product.Category)
+                                        .FirstOrDefaultAsync(product => product.Id == id);
 
             if (product == null)
             {
                 return NotFound();
             }
             
-            return ToProductDTO(product);
+            return Ok(product.ToDTO());
         }
 
         // GET: api/Products/Category?categoryId=4&pageSize=2&pageIndex=1
         [HttpGet("Category")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductByCategory([FromQuery]int categoryId, [FromQuery]int pageSize = 8, [FromQuery]int pageIndex = 1)
+        public async Task<ActionResult> GetProductByCategory([FromQuery]int categoryId, [FromQuery]int pageSize = 8, [FromQuery]int pageIndex = 1)
         {
             if (pageSize <= 0) pageSize = 8;
             if (pageIndex <= 0) pageIndex = 1;
@@ -65,26 +65,31 @@ namespace CandleInTheWind.API.Controllers
 
             if (products.Count == 0)
                 return NotFound();
-            var productResponse = products.Select(product => ToProductDTO(product));
+            var productResponse = products.Select(product => product.ToDTO());
+
             return Ok(new ProductFilterDTO()
             {
-                ProductDTOs = productResponse,
+                Products = productResponse,
                 TotalPages = totalPages,
                 PageSize = pageSize,
                 PageIndex = pageIndex,
             });
         }
 
-        // GET: api/Products/Filter?searchText=TinhDau
+        // GET: api/Products/Filter?searchText=Tinh%20Dau&pageSize=8&pageIndex=1
         [HttpGet("Filter")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductFilter([FromQuery]string searchText, [FromQuery] int pageSize = 8, [FromQuery] int pageIndex = 1)
+        public async Task<ActionResult> GetProductFilter([FromQuery]string searchText = "", [FromQuery] int pageSize = 8, [FromQuery] int pageIndex = 1)
         {
             if (pageSize <= 0) pageSize = 8;
             if (pageIndex <= 0) pageIndex = 1;
 
+            if (searchText == null)
+                searchText = "";
+
             var products_search = _context.Products
                                          .Include(product => product.Category)
-                                         .Where(product => product.Name.Contains(searchText) || product.Description.Contains(searchText));
+                                         .Where(product => product.Name.Contains(searchText) || 
+                                                product.Description.Contains(searchText));
 
             int count = products_search.Count();
             int totalPages = count / pageSize + ((count % pageSize == 0) ? 0 : 1);
@@ -96,29 +101,27 @@ namespace CandleInTheWind.API.Controllers
 
             if (products.Count == 0)
                 return NotFound();
-            var productResponse = products.Select(product => ToProductDTO(product));
+
+            var productResponse = products.Select(product => product.ToDTO());
             return Ok(new ProductFilterDTO()
             {
-                ProductDTOs = productResponse,
+                Products = productResponse,
                 TotalPages = totalPages,
                 PageSize = pageSize,
                 PageIndex = pageIndex,
             });
         }
 
-        private ProductDTO ToProductDTO(Product product)
+        [HttpGet("SpecialProduct")]
+        public async Task<ActionResult> GetSpecialProduct()
         {
-            return new ProductDTO()
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                Stock = product.Stock,
-                ImageUrl = product.ImageUrl,
-                CategoryId = product.Category.Id,
-                CategoryName = product.Category.Name,
-            };
+            var ids = new[]{ 18, 13, 12, 8};
+            var products = await _context.Products
+                                        .Include(product => product.Category)
+                                        .Where(product => ids.Contains(product.Id)).ToListAsync();
+
+            var productResponse = products.Select(product => product.ToDTO());
+            return Ok(productResponse);
         }
     }
 }

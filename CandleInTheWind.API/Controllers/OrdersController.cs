@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CandleInTheWind.Data;
 using CandleInTheWind.Models;
-using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 using CandleInTheWind.API.Models.Orders;
+using CandleInTheWind.API.Extensions;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -24,155 +23,225 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
-      
-  
-        //GET: api/Order/MyOders
+        // GET: api/Orders/MyOrders?pageIndex=1&pageSize=5
         [HttpGet("MyOrders")]
         [Authorize]
-        public async Task<ActionResult> GetOrderByUserId()
+        public async Task<ActionResult> GetMyOrders([FromQuery]int pageIndex = 1, [FromQuery]int pageSize = 5)
         {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
-            if (userIdClaim == null) 
-                return BadRequest();
-            var userId = int.Parse(userIdClaim.Value);
+            if (pageSize <= 0) 
+                pageSize = 5;
+            if (pageIndex <= 0) 
+                pageIndex = 1;
 
-            var orders = await _context.Orders.Include(order => order.User)
-                                              .Include(order => order.Product)
-                                              .Where(order => order.User.Id == userId)
-                                              .ToListAsync();
-            var responseOrders = orders.Select(order => toSimpleDTO(order));
-            return Ok(responseOrders);
-
-        }
-
-        // GET: api/Orders/MyOrder/5
-        [HttpGet("MyOrders/{OrderId}")]
-        [Authorize]
-        public async Task<ActionResult> GetOrder(int OrderId)
-        {
-            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
-            if (userIdClaim == null)
-                return BadRequest();
-
-            var userId = int.Parse(userIdClaim.Value);
-
-            var order = await _context.Orders.Include(order => order.Product)
-                                             .Include(order => order.Voucher)
-                                             .Include(order => order.User)
-                                             .Where(order => order.User.Id == userId)
-                                             .FirstOrDefaultAsync(order => order.Id == OrderId);
-
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            var responseOrder = toDTO(order);
-
-            return Ok(responseOrder);
-        }
-
-
-        private SimpleOrderDTO toSimpleDTO(Order order)
-        {
-            return new SimpleOrderDTO
-            {
-                Id = order.Id,
-                PurchaseDate = order.PurchasedDate,
-                Status = order.Status,
-                Total = order.Total,
-                ProductName = order.Product.Name
-            };
-        }
-
-
-        private OrderDTO toDTO(Order order)
-        {
-            return new OrderDTO
-            {
-                Id = order.Id,
-                PurchaseDate = order.PurchasedDate,
-                Status = order.Status,
-                UnitPrice = order.UnitPrice,
-                Quantity = order.Quantity,
-                Total = order.Total,
-                ProductId = order.Product.Id,
-                ProductName = order.Product.Name,
-                VoucherId = order.Voucher?.Id,
-                VoucherName = order.Voucher?.Name,
-                UserId = order.User.Id,
-
-            };
-        }
-
-
-
-        
-        // PUT: api/Orders/MyOrders/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("MyOrders/Cancel/{OrderId}")]
-        [Authorize]
-        public async Task<IActionResult> CancelOrder(int OrderId)
-        {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest();
             
+            var userId = int.Parse(userIdClaim.Value);
+
+            var orders = _context.Orders.Include(order => order.User)
+                                        .Include(order => order.OrderProducts) //doi tuong la Order
+                                        .ThenInclude(op => op.Product) // doi tuong se la OrderProduct
+                                        .Where(order => order.User.Id == userId);
+
+            int count = orders.Count();
+            int totalPages = count / pageSize + ((count % pageSize == 0) ? 0 : 1);
+            if (pageIndex > totalPages)
+                pageIndex = 1;
+
+            var ordersPerPage = await orders.OrderByDescending(order => order.Id).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToListAsync();
+            var responseOrders = ordersPerPage.Select(order => order.ToOrderDTO());
+
+            return Ok(new OrderFilterDTO()
+            {
+                Orders = responseOrders,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                PageIndex = pageIndex,
+            });
+        }
+
+        // GÊT: api/Orders/MyOrders/1
+        [HttpGet("MyOrders/{orderId}"),Authorize]
+        public async Task<ActionResult> GetDetailOrder([FromRoute]int orderId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+
             var userId = int.Parse(userIdClaim.Value);
 
             var order = await _context.Orders.Include(order => order.User)
-                                             .Where(order => order.User.Id == userId)
-                                             .FirstOrDefaultAsync(order => order.Id == OrderId);
+                                             .Include(order =>order.OrderProducts)
+                                             .ThenInclude(op => op.Product)
+                                             .Include(order => order.Voucher)
+                                             .FirstOrDefaultAsync(order => order.Id == orderId && order.UserId == userId);
 
-            if (order == null)
-                return NotFound(new {Error = "Không tìm thấy đơn hàng"});
-            
-            if(order.Status.Equals(OrderStatus.Canceled))
+            if(order == null) 
+                return NotFound(new {Error = "Không tìm thấy đơn hàng" });
+
+            var responseOrder = order.ToOrderDetailDTO();
+
+            if (order.Voucher == null)
             {
-                return BadRequest(new { Error = "Đơn hàng đã bị huỷ từ trước" });
+                var orderProducts = await _context.OrderProducts.Include(op => op.Product)
+                                                                .Where(op => op.OrderId == orderId)
+                                                                .ToListAsync();
+
+                decimal total = 0; // total price before deduction
+                foreach (var p in orderProducts) // return all the product in the order
+                    total += p.Product.Price * p.Quantity;
+
+                responseOrder.Points = (int)(total - order.Total);
             }
+            return Ok(responseOrder);
+        }
+
+        
+        // POST: api/Orders
+        [HttpPost("CreateOrder"), Authorize]
+        public async Task<ActionResult> PostOrder(int? voucherId, int? points )
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var user = await _context.Users.FindAsync(userId);
+
+            var total = await _context.Carts.Include(cart => cart.Product)
+                                            .Where(cart => cart.UserId == userId)
+                                            .SumAsync(cart => cart.Product.Price * cart.Quantity);
+
+
+            var userPoint = user.Points; // get user's point from database
+            if (points != null && points > 0 && voucherId != null) // cannot use points deduction and voucher at the same time
+                return BadRequest(new { Error = "Chỉ được chọn một hình thức giảm giá" });
+            if (voucherId == null && points != null)
+            {
+                
+                if (points > userPoint || points < 0)   // using point deduction
+                    return BadRequest(new { Error = "Điểm không hợp lệ" });
+                else if (points > 0)
+                {
+                    if(points > total)   // minimum total is 0
+                    {
+                        user.Points -= (int)total;
+                        total = 0;
+                    }
+                    else
+                    {
+                        total -= (int)points;
+                        user.Points -= (int)points;
+                    }
+                }                    
+            }
+            
+            if (voucherId != null && (points == null || points == 0)) // using voucher
+            {
+                var voucher = await _context.Vouchers.FindAsync(voucherId);
+                if (voucher == null)
+                    return NotFound(new {Error = "Không tìm thấy voucher" });
+                if (userPoint < voucher.Points)
+                    return BadRequest(new { Error = "Không đủ điều kiện áp dụng voucher" });
+                if(voucher.Quantity == 0)
+                    return BadRequest(new {Error = "Không còn voucher" });
+
+                total = total * (decimal)(100 - voucher.Value) / 100;
+                voucher.Quantity--;  // decrease number of voucher in database
+                user.Points -= voucher.Points; // decrease user point
+            }
+
+            var newOrder = new Order
+            {
+                PurchasedDate = DateTime.Now,
+                Total = total,
+                VoucherId = voucherId,
+                UserId = userId
+            };
+            _context.Orders.Add(newOrder);
+            await _context.SaveChangesAsync();
+
+            var carts = await _context.Carts.Include(cart => cart.Product).Where(cart => cart.UserId == userId).ToListAsync();
+
+            foreach (var c in carts)
+                c.Product.Stock -= c.Quantity; // decrease each product's stock in database
+            
+
+            if (carts.Count == 0) // no product in cart
+                return BadRequest(new { Error = "Vui lòng chọn sản phẩm trước" });
+            var newOrderProducts = carts.Select(cart => new OrderProduct
+            {
+                OrderId = newOrder.Id,
+                ProductId = cart.ProductId,
+                UnitPrice = cart.Product.Price,
+                Quantity = cart.Quantity
+            });
+
+            _context.OrderProducts.AddRange(newOrderProducts);
+
+             _context.Carts.RemoveRange(carts);  // remove product in cart
+            await _context.SaveChangesAsync();
+
+            //return CreatedAtAction("GetDetailOrder", new { OrderId = newOrder.Id });
+            return Ok(new { Message = "Đơn hàng đang được xử lý, cảm ơn quý khách" });
+        }
+
+        // PUT: api/Orders/MyOrder/1
+        [HttpPut("MyOrder/{orderId}"), Authorize]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userIdClaim == null)
+                return BadRequest();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var user = await _context.Users.FindAsync(userId);
+
+            var order = await _context.Orders.Include(order => order.User)
+                                             .Include(order => order.Voucher)
+                                             .FirstOrDefaultAsync(order => order.Id == orderId && order.UserId == userId);
+
+            if(order == null)
+                return NotFound(new {Error = "Không tìm thấy đơn hàng" });
+
+            if (order.Status == OrderStatus.Approved || order.Status == OrderStatus.NotApproved || order.Status == OrderStatus.Canceled)
+                return BadRequest(new { Error = "Không thể huỷ đơn hàng" });
             else
             {
                 order.Status = OrderStatus.Canceled;
-            }
-
-            _context.Entry(order).State = EntityState.Modified;
-
-            
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!OrderExists(OrderId))
+                if (order.VoucherId != null) // return the voucher if used
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            } 
 
-            return Ok("Huỷ đơn hàng thành công.");
+                    order.Voucher.Quantity++;
+                    user.Points += order.Voucher.Points; //return used point
+                }
+
+                var orderProducts = await _context.OrderProducts.Include(op => op.Product)
+                                                                .Where(op => op.OrderId == orderId)
+                                                                .ToListAsync();
+
+                decimal total = 0; // total price before deduction
+                foreach (var p in orderProducts) // return all the product in the order
+                {
+                    p.Product.Stock += p.Quantity;
+                    total += p.Product.Price * p.Quantity;
+                }
+                if(order.VoucherId == null)
+                    user.Points += (int)(total - order.Total); //return points for the users 
+
+                await _context.SaveChangesAsync(); // Save changes (product, voucher?, points?, orderStatus)
+
+                return Ok(new { Message = "Huỷ đơn hàng thành công" });
+            }
         }
 
-        /*
-        // POST: api/Orders
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Order>> PostOrder(Order order)
-        {
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
-        }
 
         // DELETE: api/Orders/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOrder(int id)
+        public async Task<ActionResult> DeleteOrder(int id)
         {
             var order = await _context.Orders.FindAsync(id);
             if (order == null)
@@ -185,13 +254,5 @@ namespace CandleInTheWind.API.Controllers
 
             return NoContent();
         }
-        */
-        private bool OrderExists(int id)
-        {
-            return _context.Orders.Any(e => e.Id == id);
-        }
-        
-        
-
     }
 }

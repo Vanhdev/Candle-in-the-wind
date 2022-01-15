@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CandleInTheWind.API.Models.Accounts
+﻿namespace CandleInTheWind.API.Models.Accounts
 {
     public class AccountResponseDTO
     {
         public bool Success { get; set; }
         public string AccessToken { get; set; }
-        public string ErrorMessage { get; set; }
+        public string Error { get; set; }
     }
 }
