@@ -136,7 +136,7 @@ namespace CandleInTheWind.API.Controllers
             
             var userId = int.Parse(userIdClaim.Value);
             var post = await _context.Posts.FirstOrDefaultAsync(post => post.Id == postId && post.Status == PostStatus.Approved);
-            // 
+            // cannot add comment to a not approved post.
             
             if (post == null)
                 return NotFound(new { Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
