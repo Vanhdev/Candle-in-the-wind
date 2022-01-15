@@ -64,9 +64,6 @@ namespace CandleInTheWind.Data
                     .HasConstraintName("FK_OrderProduct_Product");
             });
 
-            
-            
-
         }
     }
 }

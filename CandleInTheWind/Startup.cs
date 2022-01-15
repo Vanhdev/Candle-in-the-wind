@@ -1,11 +1,7 @@
 using CandleInTheWind.Data;
-using CandleInTheWind.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,7 +45,7 @@ namespace CandleInTheWind
             {
                 options.Cookie.Name = "CookieAuth";
                 options.Cookie.MaxAge = TimeSpan.FromMinutes(2);
-                
+
             });
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -61,7 +57,6 @@ namespace CandleInTheWind
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseMigrationsEndPoint();
             }
             else
             {
@@ -74,7 +69,6 @@ namespace CandleInTheWind
 
             app.UseRouting();
 
-            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -82,7 +76,6 @@ namespace CandleInTheWind
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapRazorPages();
             });
         }
     }
