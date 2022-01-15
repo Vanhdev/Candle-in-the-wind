@@ -1,52 +1,283 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CandleInTheWind</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+	<title>@ViewData["Title"] - CandleInTheWind</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="description" content="#">
+	<meta name="keywords"
+		  content="Admin , Responsive, Landing, Bootstrap, App, Template, Mobile, iOS, Android, apple, creative app">
+	<meta name="author" content="#">
+	<!-- Favicon icon -->
+	<link rel="icon" href="~/files/assets/images/favicon.ico" type="image/x-icon">
+	<!-- Google font-->
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,800" rel="stylesheet">
+	<!-- Required Fremwork -->
+	<link rel="stylesheet" type="text/css" href="~/files/bower_components/bootstrap/css/bootstrap.min.css">
+	<!-- themify-icons line icon -->
+	<link rel="stylesheet" type="text/css" href="~/files/assets/icon/themify-icons/themify-icons.css">
+	<!-- ico font -->
+	<link rel="stylesheet" type="text/css" href="~/files/assets/icon/icofont/css/icofont.css">
+	<!-- feather Awesome -->
+	<link rel="stylesheet" type="text/css" href="~/files/assets/icon/feather/css/feather.css">
+	<!-- Style.css -->
+	<link rel="stylesheet" type="text/css" href="~/files/assets/css/style.css">>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CandleInTheWind</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index">Account</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+	<!-- Pre-loader start -->
+	<div class="theme-loader">
+		<div class="ball-scale">
+			<div class='contain'>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+				<div class="ring">
+					<div class="frame"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Pre-loader end -->
+	<div id="pcoded" class="pcoded">
+		<div class="pcoded-overlay-box"></div>
+		<div class="pcoded-container navbar-wrapper">
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2021 - CandleInTheWind - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+			<nav class="navbar header-navbar pcoded-header">
+				<div class="navbar-wrapper">
+
+					<div class="navbar-logo">
+						<a class="mobile-menu" id="mobile-collapse" href="#!">
+							<i class="feather icon-menu"></i>
+						</a>
+						<a href="index-1.htm">
+							CandleTheWind
+						</a>
+						<a class="mobile-options">
+							<i class="feather icon-more-horizontal"></i>
+						</a>
+					</div>
+
+					<div class="navbar-container container-fluid">
+						<ul class="nav-left">
+							<li>
+								<a href="#!" onclick="javascript:toggleFullScreen()">
+									<i class="feather icon-maximize full-screen"></i>
+								</a>
+							</li>
+						</ul>
+						<ul class="nav-right">
+							<li class="header-notification">
+								<div class="dropdown-primary dropdown">
+									<div class="dropdown-toggle" data-toggle="dropdown">
+										<i class="feather icon-bell"></i>
+										<span class="badge bg-c-pink">5</span>
+									</div>
+									<ul class="show-notification notification-view dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+										<li>
+											<h6>Thông báo</h6>
+										</li>
+										<li>
+											<div class="media">
+												<div class="media-body">
+													<h5 class="notification-user">John Doe</h5>
+													<p class="notification-msg">Lorem ipsum dolor sit amet, consectetuer elit.</p>
+												</div>
+											</div>
+										</li>
+										<li>
+											<div class="media">
+												<div class="media-body">
+													<h5 class="notification-user">Joseph William</h5>
+													<p class="notification-msg">Lorem ipsum dolor sit amet, consectetuer elit.</p>
+												</div>
+											</div>
+										</li>
+										<li>
+											<div class="media">
+												<div class="media-body">
+													<h5 class="notification-user">Sara Soudein</h5>
+													<p class="notification-msg">Lorem ipsum dolor sit amet, consectetuer elit.</p>
+												</div>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</li>
+							<li class="user-profile header-notification">
+								<div class="dropdown-primary dropdown">
+									<div class="dropdown-toggle" data-toggle="dropdown">
+										<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5FVaPgpUG2-XXVSeTDFiiejHcuJXqxnOWSA&usqp=CAU" class="img-radius" alt="User-Profile-Image">
+										<span>Admin</span>
+										<i class="feather icon-chevron-down"></i>
+									</div>
+									<ul class="show-notification profile-notification dropdown-menu" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut">
+										<li>
+											<a href="user-profile.htm">
+												<i class="feather icon-user"></i> Profile
+											</a>
+										</li>
+										<li>
+											<a href="auth-normal-sign-in.htm">
+												<i class="feather icon-log-out"></i> Logout
+											</a>
+										</li>
+									</ul>
+
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
+			<div class="pcoded-main-container">
+				<div class="pcoded-wrapper">
+					<nav class="pcoded-navbar">
+						<div class="pcoded-inner-navbar main-menu">
+							<div class="pcoded-navigatio-lavel">Menu</div>
+							<ul class="pcoded-item pcoded-left-item">
+								<li class="pcoded-hasmenu">
+									<a href="javascript:void(0)">
+										<span class="pcoded-micon"><i class="feather icon-home"></i></span>
+										<span class="pcoded-mtext">Quản Lý Sản Phẩm</span>
+									</a>
+									<ul class="pcoded-submenu">
+										<li class="">
+											<a href="ListProduct.html">
+												<span class="pcoded-mtext">Danh Sách Sản Phẩm</span>
+											</a>
+										</li>
+										<li class="">
+											<a href="AddProduct.html">
+												<span class="pcoded-mtext">Thêm Sản Phẩm</span>
+											</a>
+										</li>
+
+									</ul>
+								</li>
+								<li class="pcoded-hasmenu">
+									<a href="javascript:void(0)">
+										<span class="pcoded-micon"><i class="feather icon-home"></i></span>
+										<span class="pcoded-mtext">Quản Lý Đơn Hàng </span>
+									</a>
+									<ul class="pcoded-submenu">
+										<li class="">
+											<a asp-controller ="Orders" asp-action="Index">
+												<span class="pcoded-mtext">Danh Sách Đơn Hàng </span>
+											</a>
+										</li>
+										<li class="">
+											<a asp-controller="Orders" asp-action="Create">
+												<span class="pcoded-mtext">Thêm Đơn Hàng </span>
+											</a>
+										</li>
+									</ul>
+								</li>
+								<li class="pcoded-hasmenu">
+									<a href="javascript:void(0)">
+										<span class="pcoded-micon"><i class="feather icon-home"></i></span>
+										<span class="pcoded-mtext">Quản Lý Khách Hàng </span>
+									</a>
+									<ul class="pcoded-submenu">
+										<li class="">
+											<a asp-controller="Users" asp-action="Index">
+												<span class="pcoded-mtext">Danh Sách Khách Hàng </span>
+											</a>
+										</li>
+									</ul>
+								</li>
+								<li class="pcoded-hasmenu">
+									<a href="javascript:void(0)">
+										<span class="pcoded-micon"><i class="feather icon-home"></i></span>
+										<span class="pcoded-mtext">Quản Lý Mã Giảm Giá</span>
+									</a>
+									<ul class="pcoded-submenu">
+										<li class="">
+											<a asp-controller="Vouchers" asp-action="Index">
+												<span class="pcoded-mtext">Danh Sách Mã Giảm Giá</span>
+											</a>
+										</li>
+									</ul>
+								</li>
+
+								<li class="pcoded-hasmenu">
+									<a href="javascript:void(0)">
+										<span class="pcoded-micon"><i class="feather icon-home"></i></span>
+										<span class="pcoded-mtext">Quản Lý Hạng Mục</span>
+									</a>
+									<ul class="pcoded-submenu">
+										<li class="">
+											<a href="ListCategory.html">
+												<span class="pcoded-mtext">Hạng Mục Sản Phẩm</span>
+											</a>
+										</li>
+									</ul>
+								</li>
+								<li class="pcoded-hasmenu">
+									<a href="javascript:void(0)">
+										<span class="pcoded-micon"><i class="feather icon-home"></i></span>
+										<span class="pcoded-mtext">Mua Hàng Tại Cửa Hàng</span>
+									</a>
+									<ul class="pcoded-submenu">
+										<li class="">
+											<a href="CreOrder.html">
+												<span class="pcoded-mtext">Tạo Đơn Hàng </span>
+											</a>
+										</li>
+									</ul>
+								</li>
+								<li class="">
+									<a asp-controller="Posts" asp-action="Index">
+										<span class="pcoded-micon"><i class="feather icon-menu"></i></span>
+										<span class="pcoded-mtext">Quản Lý Bài Viết</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</nav>
+					<div class="pcoded-content">
+						<div class="pcoded-inner-content">
+							@RenderBody()
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="~/files/bower_components/jquery/js/jquery.min.js"></script>
+	<script type="text/javascript" src="~/files/bower_components/jquery-ui/js/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="~/files/bower_components/popper.js/js/popper.min.js"></script>
+	<script type="text/javascript" src="~/files/bower_components/bootstrap/js/bootstrap.min.js"></script>
+	<script src="~/files/assets/js/pcoded.min.js"></script>
+	<script src="~/files/assets/js/vartical-layout.min.js"></script>
+	<script type="text/javascript" src="~/files/assets/js/script.js"></script>
+	<script type="text/javascript" src="~/files/assets/pages/j-pro/js/jquery-cloneya.min.js"></script>
+	<script type="text/javascript" src="~/files/assets/pages/j-pro/js/custom/cloned-form.js"></script>
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

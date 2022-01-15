@@ -1,0 +1,95 @@
+﻿@model CandleInTheWind.Models.Voucher
+
+@{
+	ViewData["Title"] = "Edit";
+}
+
+<div class="main-body">
+ <div class="page-wrapper">
+  <!-- Page-header start -->
+  <div class="page-header">
+   <div class="row align-items-end">
+	<div class="col-lg-8">
+	 <div class="page-header-title">
+	  <div class="d-inline">
+	   <h4>Sửa Mã Khuyến Mãi </h4>
+	  </div>
+	 </div>
+	</div>
+   </div>
+  </div>
+  <!-- Add Product -->
+  <div class="card">
+   <div class="card-block">
+	<div class="row">
+	 <div class="col-sm-12">
+	  <div class="product-edit">
+	   <!-- Tab panes -->
+	   <div class="tab-content">
+		<div class="tab-pane active" id="home7" role="tabpanel">
+		 <form class="md-float-material card-block" asp-action="Edit">
+		  <div class="row">
+		   <div class="col-sm-8">
+			<div class="col-sm-12">
+			 <div class="input-group">
+			  <span class="input-group-addon">
+			   <i class="icofont icofont-copy-alt"></i>
+			  </span>
+			  <input type="text" asp-for="Name" class="form-control" placeholder="@Model.Name"/>
+			 </div>
+			</div>
+			<div class="col-sm-12">
+			 <div class="input-group">
+			  <span class="input-group-addon">
+			   <i class="icofont icofont-copy-alt"></i>
+			  </span>
+			  <input type="number" asp-for="Value" class="form-control" placeholder="@Model.Value"/>
+			 </div>
+			</div>
+			<div class="col-sm-12">
+			 <div class="input-group">
+			  <span class="input-group-addon">
+			   <i class="icofont icofont-copy-alt"></i>
+			  </span>
+			  <input type="date" asp-for="Expired" class="form-control" placeholder="@Model.Expired"/>
+			 </div>
+			</div>
+			<div class="col-sm-12">
+			 <div class="input-group">
+			  <span class="input-group-addon">
+			   <i class="icofont icofont-numbered"></i>
+			  </span>
+			  <input type="number" asp-for="Quantity" class="form-control" placeholder="@Model.Quantity"/>
+			 </div>
+			</div>
+			<div class="col-sm-12">
+			 <div class="input-group">
+			  <span class="input-group-addon">
+			   <i class="icofont icofont-numbered"></i>
+			  </span>
+			  <input type="number" asp-for="Points" class="form-control" placeholder="@Model.Points"/>
+			 </div>
+			</div>
+		   </div>
+
+		  </div>
+		  <div class="col-sm-7">
+		   <div class="text-center m-t-20">
+			<input type="submit" class="btn btn-primary waves-effect waves-light m-r-10" value="Save"/>
+		   </div>
+		  </div>
+		 </form>
+		</div>
+	   </div>
+	  </div>
+	 </div>
+	</div>
+   </div>
+   <!-- Page-header end -->
+  </div>
+ </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

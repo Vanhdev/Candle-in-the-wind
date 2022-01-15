@@ -1,0 +1,154 @@
+﻿@model IEnumerable<CandleInTheWind.Models.Post>
+
+@{
+	ViewData["Title"] = "Quản lý bài viết";
+}
+
+<div class="main-body">
+ <div class="page-wrapper">
+  <!-- Page-header start -->
+  <div class="page-header">
+   <div class="row align-items-end">
+	<div class="col-lg-8">
+	 <div class="page-header-title">
+	  <div class="d-inline">
+	   <h4>Danh Sách Bài Viết</h4>
+	  </div>
+	 </div>
+	</div>
+   </div>
+  </div>
+  <!-- Content -->
+  <div class="row">
+   <div class="col-lg-12">
+	   <form class="row seacrh-header">
+		<div class="col-lg-4 offset-lg-4 offset-sm-3 col-sm-6 offset-sm-1 col-xs-12">
+		 <div class="input-group input-group-button input-group-primary" asp-controller="Post" asp-action="Index" method="get">
+		  <input type="text" class="form-control" placeholder="Search here..." name="SearchString">
+		  <input class="btn btn-primary input-group-addon" type="submit" value="Search">
+		 </div>
+		</div>
+	   </form>
+	<!-- tab header start -->
+	<div class="tab-header card">
+	 <ul class="nav nav-tabs md-tabs tab-timeline" role="tablist" id="mytab">
+	  <li class="nav-item">
+	   <a class="nav-link active" data-toggle="tab" href="#personal" role="tab">Bài chưa duyệt</a>
+	   <div class="slide"></div>
+	  </li>
+	  <li class="nav-item">
+	   <a class="nav-link" data-toggle="tab" href="#binfo" role="tab">Bài đã duyệt</a>
+	   <div class="slide"></div>
+	  </li>
+	 </ul>
+	</div>
+	<div class="tab-content">
+	 <div class="tab-pane active" id="personal" role="tabpanel">
+	  <div class="card">
+							@{
+								foreach (var item in Model)
+								{
+									if (item.Status == PostStatus.NotApprovedYet)
+									{
+			 <div class="card">
+		   <div class="card-block">
+			<div class="media-body">
+			 <h6 class="media-heading">@item.Title</h6>
+			 <p class="m-b-0">
+														@item.Content
+			 </p>
+			 <div class="m-b-25">
+			 </div>
+			 <div class="dropdown-success dropdown open">
+			  <button class="btn btn-light dropdown-toggle waves-effect waves-light " type="button" id="dropdown-3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+			Chờ xác nhận
+			  </button>
+			  <div class="dropdown-menu">
+			<a class="dropdown-item waves-light waves-effect" asp-action="Approve" asp-route-id="@item.Id">Duyêt</a>
+			<a class="dropdown-item waves-light waves-effect" asp-action="Delete" asp-route-id="@item.Id">Từ chối</a>
+			  </div>
+			 </div>
+			</div>
+		   </div>
+			 </div>
+									}
+								}
+							}
+	  </div>
+	 </div>
+	 <div class="tab-pane" id="binfo" role="tabpanel">
+	  <div class="card">
+							@{
+								foreach (var item in Model)
+									if (item.Status == PostStatus.Approved)
+									{
+			 <div class="card">
+		   <div class="card-block">
+			<div class="media-body">
+			 <h6 class="media-heading">@item.Title</h6>
+			 <p class="m-b-0">
+			  @item.Content
+			 </p>
+			 <div class="m-b-25">
+			 </div>
+			 <a href="" class="btn btn-light" data-toggle="modal" data-target="#delete-post" onclick="deleteConfirm(@item.Id)">Xóa Bài Viết</a>`
+			</div>
+		   </div>
+			 </div>
+									}
+
+							}
+	  </div>
+	 </div>
+	</div>
+   </div>
+  </div>
+ </div>
+</div>
+<!--Start Confirm delete  -->
+<div class="modal fade" id="delete-post" tabindex="-1" role="dialog">
+ <div class="modal-dialog" role="document">
+  <div class="modal-content">
+   <div class="modal-header">
+	<h4 class="modal-title">Delete Post</h4>
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	 <span aria-hidden="true">&times;</span>
+	</button>
+   </div>
+   <div class="modal-body">
+	<p>Bạn có chắc chắn muốn xóa không</p>
+   </div>
+   <div class="modal-footer">
+	<button type="button" class="btn btn-danger waves-effect waves-light " onclick="deleteData()">Delete</button>
+	<button type="button" class="btn btn-default waves-effect " data-dismiss="modal">Close</button>
+   </div>
+  </div>
+ </div>
+</div>
+@section Scripts{
+<script type="text/javascript">
+	 //this is only display bootstrap modal pop up dialog
+	 var id;
+	 var deleteConfirm = function (val) {
+		 id = val;
+		 $('#delete-conformation').modal('show');
+	 }
+	 //call this function after click on confirm delete button
+	 var deleteData = function () {
+	 $('#divLoading').show();
+	 $.ajax({
+		 type: "POST",
+		 url: '@Url.Action("Delete","Posts")',
+		 data:{id: id},
+		 success: function (result) {
+			$("#delete-conformation").modal('hide');
+			window.location.href = '@Url.Action("Index","Posts")';
+		 },
+		 error: function () {
+			 $("#delete-conformation").modal('hide');
+			 window.location.href = '@Url.Action("Index","Posts")';
+		 }
+	 });
+	}
+</script>
+}

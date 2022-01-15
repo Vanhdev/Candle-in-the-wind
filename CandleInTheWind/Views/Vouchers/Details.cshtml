@@ -1,0 +1,88 @@
+﻿@model CandleInTheWind.Models.Voucher
+
+@{
+    ViewData["Title"] = "Chi tiết mã giảm giá";
+}
+
+<div class="main-body">
+ <div class="page-wrapper">
+  <!-- Page-header start -->
+  <div class="page-header">
+   <div class="row align-items-end">
+	<div class="col-lg-8">
+	 <div class="page-header-title">
+	  <div class="d-inline">
+	   <h4>Chi tiết mã giảm giá</h4>
+	  </div>
+	 </div>
+	</div>
+   </div>
+  </div>
+  <div class="card">
+   <div class="card-block">
+	<div class="view-info">
+	 <div class="row">
+	  <div class="col-lg-12">
+	   <div class="general-info">
+		<div class="row">
+		 <div class="col-lg-12 col-xl-6">
+		  <div class="table-responsive">
+		   <table class="table m-0">
+			<tbody>
+			 <tr>
+			  <th scope="row">Mã khuyến mãi</th>
+			  <td>@Html.DisplayFor(model => model.Name)</td>
+			 </tr>
+			 <tr>
+			  <th scope="row">Ngày tạo mã</th>
+			  <td>@Html.DisplayFor(model => model.Created)</td>
+			 </tr>
+			 <tr>
+			  <th scope="row">Ngày hết hạn</th>
+			  <td>@Html.DisplayFor(model => model.Expired)</td>
+			 </tr>
+			</tbody>
+		   </table>
+		  </div>
+		 </div>
+		 <!-- end of table col-lg-6 -->
+		 <div class="col-lg-12 col-xl-6">
+		  <div class="table-responsive">
+		   <table class="table">
+			<tbody>
+			 <tr>
+			  <th scope="row">Giá trị mã</th>
+			  <td>@Html.DisplayFor(model => model.Value)</td>
+			 </tr>
+			 <tr>
+			  <th scope="row">Số lượng mã</th>
+			  <td>@Html.DisplayFor(model => model.Quantity)</td>
+			 </tr>
+			 <tr>
+			  <th scope="row">Điểm điều kiện</th>
+			  <td>@Html.DisplayFor(model => model.Points)</td>
+			 </tr>
+			</tbody>
+		   </table>
+		  </div>
+		 </div>
+		 <!-- end of table col-lg-6 -->
+		</div>
+		<!-- end of row -->
+	   </div>
+	   <!-- end of general info -->
+	  </div>
+	  <!-- end of col-lg-12 -->
+	 </div>
+	 <!-- end of row -->
+	</div>
+	<a class="btn btn-primary" style="margin-bottom: 10px;" asp-action="Index">
+	  Back
+	 </a>
+
+   </div>
+   <!-- end of card-block -->
+  </div>
+  <!-- Page-header end -->
+ </div>
+</div>

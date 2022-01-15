@@ -22,6 +22,7 @@ namespace CandleInTheWind.Models
 
         [Required]
         [DataType(DataType.Date)]
+        [ExpiredDate]
         public DateTime Expired { get; set; }
 
         [Required]
@@ -38,5 +39,29 @@ namespace CandleInTheWind.Models
 
 
         public virtual ICollection<Order> Orders{ get; set; }
+    }
+    public class ExpiredDateAttribute : ValidationAttribute
+    {
+        public ExpiredDateAttribute()
+        {
+        }
+
+        public string GetErrorMessage() =>
+            $"Ngày hết hạn phải muộn hơn ngày tạo mã.";
+
+        protected override ValidationResult IsValid(object value,
+            ValidationContext validationContext)
+        {
+            var Expired = (DateTime)value;
+
+            int compare = DateTime.Compare(DateTime.Now, Expired);
+
+            if (compare == 1)
+            {
+                return new ValidationResult(GetErrorMessage());
+            }
+
+            return ValidationResult.Success;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,6 +24,9 @@ namespace CandleInTheWind.Models
         public int Stock { get; set; }
 
         public string ImageUrl { get; set; }
+
+        [NotMapped]
+        public IFormFile Image { get; set; }
 
         [Required]
         public int CategoryId { get; set; }
