@@ -35,11 +35,22 @@ namespace CandleInTheWind.API.Controllers
             }
             var id = int.Parse(userIdClaim.Value);
 
-            var carts = await _context.Carts.Where(cart => cart.UserId == id)
-                                            .Include(cart => cart.Product)
-                                            .ToListAsync();
+            var carts = _context.Carts.Where(cart => cart.UserId == id)
+                                      .Include(cart => cart.Product);
 
-            var cartResponse = carts.Select(cart => cart.ToDTO());
+            var removeCarts = carts.Where(cart => cart.Product.Stock == 0);
+            if (removeCarts.Count() > 0)
+            {
+                _context.Carts.RemoveRange(removeCarts);
+                var result = await _context.SaveChangesAsync();
+                if (result == 0)
+                    return StatusCode(StatusCodes.Status500InternalServerError, new
+                    {
+                        Error = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại"
+                    });
+            }
+
+            var cartResponse = (await carts.Where(cart => cart.Product.Stock > 0).ToListAsync()).Select(cart => cart.ToDTO());
             return Ok(new CartListDTO()
             {
                 Products = cartResponse,
@@ -122,6 +133,9 @@ namespace CandleInTheWind.API.Controllers
             var product = await _context.Products.FirstOrDefaultAsync(product => product.Id == productId);
             if (product == null)
                 return NotFound(new { Error = "Không tìm thấy sản phẩm cần thêm" });
+
+            if (product.Stock == 0)
+                return BadRequest(new { Error = "Sản phẩm hiện đã hết hàng" });
 
             if (CartExists(id, productId))
                 return Conflict(new { Error = "Giỏ hàng của bạn đã có sản phẩm này" });

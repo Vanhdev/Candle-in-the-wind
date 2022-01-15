@@ -78,10 +78,13 @@ namespace CandleInTheWind.API.Controllers
 
         // GET: api/Products/Filter?searchText=Tinh%20Dau&pageSize=8&pageIndex=1
         [HttpGet("Filter")]
-        public async Task<ActionResult> GetProductFilter([FromQuery]string searchText, [FromQuery] int pageSize = 8, [FromQuery] int pageIndex = 1)
+        public async Task<ActionResult> GetProductFilter([FromQuery]string searchText = "", [FromQuery] int pageSize = 8, [FromQuery] int pageIndex = 1)
         {
             if (pageSize <= 0) pageSize = 8;
             if (pageIndex <= 0) pageIndex = 1;
+
+            if (searchText == null)
+                searchText = "";
 
             var products_search = _context.Products
                                          .Include(product => product.Category)
