@@ -135,7 +135,8 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest();
             
             var userId = int.Parse(userIdClaim.Value);
-            var post = await _context.Posts.FindAsync(postId);
+            var post = await _context.Posts.FirstOrDefaultAsync(post => post.Id == postId && post.Status == PostStatus.Approved);
+            // 
             
             if (post == null)
                 return NotFound(new { Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });

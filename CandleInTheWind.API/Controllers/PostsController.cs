@@ -207,7 +207,12 @@ namespace CandleInTheWind.API.Controllers
 
             if(post == null)
                 return NotFound(new {Error = "Không tìm thấy bài viết hoặc bài viết đã bị xoá" });
-
+            
+            // delete comments in deleted post
+            var comments = _context.Comments.Where(comment => comment.PostId == postId);
+            if (comments != null)
+                _context.Comments.RemoveRange(comments);
+           
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
             
