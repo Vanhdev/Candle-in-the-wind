@@ -107,34 +107,19 @@ namespace CandleInTheWind.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Created,Expired,Value,Quantity,Points")] Voucher voucher)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Expired,Value,Quantity,Points")] Voucher voucher)
         {
             if (id != voucher.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(voucher);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!VoucherExists(voucher.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(voucher);
+
+            _context.Update(voucher);
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Vouchers/Delete/5

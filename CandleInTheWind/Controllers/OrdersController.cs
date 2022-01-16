@@ -110,13 +110,11 @@ namespace CandleInTheWind.Controllers
 
             order.Total = (order.Voucher == null) ? total : (int)(total * order.Voucher.Value / 100);
 
-            if (order.User.Points > order.Voucher.Points && order.Voucher.Quantity > 0)
+            if (order.Voucher != null && order.User.Points > order.Voucher.Points && order.Voucher.Quantity > 0)
             {
                 order.User.Points -= order.Voucher.Points;
                 order.Voucher.Quantity -= 1;
             }
-            else
-                order.Voucher = null;
 
             _context.AddRange(orderProducts);
 
