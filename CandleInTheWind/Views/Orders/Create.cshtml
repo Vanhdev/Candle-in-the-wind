@@ -1,126 +1,91 @@
-﻿@model CandleInTheWind.Models.Order
+﻿@model CandleInTheWind.Models.OrderViewModel
 
 @{
-    ViewData["Title"] = "Tạo đơn hàng";
+	ViewData["Title"] = "Create";
 }
 
 <div class="main-body">
-                                <div class="page-wrapper">
-                                    <!-- Page-header start -->
-                                    <div class="page-header">
-                                        <div class="row align-items-end">
-                                            <div class="col-lg-8">
-                                                <div class="page-header-title">
-                                                    <div class="d-inline">
-                                                        <h4>Thêm đơn hàng </h4>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Add Product -->
-                                    <div class="card">
-                                        <div class="card-block">
-                                            <div class="row">
-                                                <div class="col-sm-12">
-                                                    <div class="product-edit">
-                                                        <!-- Tab panes -->
-                                                        <div class="tab-content">
-                                                            <div class="tab-pane active" id="home7" role="tabpanel">
-                                                                <form class="md-float-material card-block">
-                                                                    <div class="row">
-                                                                        <div class="col-sm-12">
-                                                                            <div class="col-sm-8">
-                                                                                <div class="input-group">
-                                                                                    <span class="input-group-addon"><i
-                                                                                            class="icofont icofont-copy-alt"></i></span>
-                                                                                    <textarea rows="1" cols="1"
-                                                                                        class="form-control"
-                                                                                        placeholder="Mã đơn hàng  " required></textarea>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-sm-8">
-                                                                                <div class="input-group">
-                                                                                    <span class="input-group-addon"><i
-                                                                                            class="icofont icofont-copy-alt"></i></span>
-                                                                                    <textarea rows="1" cols="1"
-                                                                                        class="form-control"
-                                                                                        placeholder="Mã khách hàng  " required></textarea>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="clone-rightside-btn-1">
-                                                                                <div class="row col-sm-11 j-row toclone-widget-right toclone">
-                                                                                    <div class="col-sm-4 input-group">
-                                                                                        <span class="input-group-addon"><i
-                                                                                            class="icofont icofont-copy-alt"></i></span>
-                                                                                    <input rows="1" cols="1"
-                                                                                        class="form-control"
-                                                                                        placeholder="Mã sản phẩm "
-                                                                                        required>
-                                                                                    </div>
-                                                                                    <div class="col-sm-5 input-group">
-                                                                                        <span class="input-group-addon"><i
-                                                                                            class="icofont icofont-numbered"></i></span>
-                                                                                        <input type="number" class="form-control" placeholder="Số lượng sản phẩm  " required>
-                                                                                    </div>
-                                                                                    <button type="button" class="btn btn-icon btn-primary clone-btn-right clone">
-                                                                                        <i class="icofont icofont-plus"></i>
-                                                                                    </button>
-                                                                                    <button type="button" class="btn btn-icon btn-default clone-btn-right delete">
-                                                                                        <i class="icofont icofont-minus"></i>
-                                                                                    </button>
-                                                                                </div>  
-                                                                            </div>
-                                                                            <div class="col-sm-8">
-                                                                                <div class="input-group">
-                                                                                    <span class="input-group-addon"><i
-                                                                                            class="icofont icofont-copy-alt"></i></span>
-                                                                                    <textarea rows="1" cols="1"
-                                                                                        class="form-control"
-                                                                                        placeholder="Địa chỉ giao hàng " required></textarea>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-sm-8">
-                                                                                <div class="input-group">
-                                                                                    <span class="input-group-addon"><i
-                                                                                            class="icofont icofont-stock-search"></i></span>
-                                                                                    <input type="date"
-                                                                                        class="form-control"
-                                                                                        placeholder="Ngày mua  " required>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-sm-8">
-                                                                                <div class="input-group">
-                                                                                    <span class="input-group-addon"><i
-                                                                                            class="icofont icofont-copy-alt"></i></span>
-                                                                                    <textarea rows="1" cols="1"
-                                                                                        class="form-control"
-                                                                                        placeholder="Mã giảm giá  " required></textarea>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-sm-7">
-                                                                        <div class="text-center m-t-20">
-                                                                            <button type="submit"
-                                                                                class="btn btn-primary waves-effect waves-light m-r-10">
-                                                                                Thêm đơn hàng 
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <!-- Page-header end -->
-                                    </div>
-                                </div>
-                            </div>
+ <div class="page-wrapper">
+  <!-- Page-header start -->
+  <div class="page-header">
+   <div class="row align-items-end">
+	<div class="col-lg-8">
+	 <div class="page-header-title">
+	  <div class="d-inline">
+	   <h4>Thêm đơn hàng </h4>
+	  </div>
+	 </div>
+	</div>
+   </div>
+  </div>
+  <!-- Add Product -->
+  <div class="card">
+   <div class="card-block">
+	<div class="row">
+	 <div class="col-sm-12">
+	  <div class="product-edit">
+	   <!-- Tab panes -->
+	   <div class="tab-content">
+		<div class="tab-pane active" id="home7" role="tabpanel">
+		 <form class="md-float-material card-block" asp-controller="Orders" asp-action="CreateViewModel">
+		  <div class="row">
+		   <div class="col-sm-12">
+			<div class="col-sm-8">
+			 <div class="input-group">
+			  <span class="input-group-addon">
+			   <i class="icofont icofont-copy-alt"></i>
+			  </span>
+			  <textarea rows="1" cols="1" class="form-control" placeholder="Mã khách hàng  " asp-for="UserID" required></textarea>
+			 </div>
+			</div>
+			<div class="clone-rightside-btn-1">
+			 <div class="row col-sm-11 j-row toclone-widget-right toclone">
+			  <div class="col-sm-4 input-group">
+			   <span class="input-group-addon">
+				<i class="icofont icofont-copy-alt"></i>
+			   </span>
+			   <textarea rows="1" cols="1" class="form-control" placeholder="Mã sản phẩm " asp-for="ProductID" required></textarea>
+			  </div>
+			  <div class="col-sm-5 input-group">
+			   <span class="input-group-addon">
+				<i class="icofont icofont-numbered"></i>
+			   </span>
+			   <input type="number" class="form-control" placeholder="Số lượng sản phẩm  " asp-for="Quantity" required>
+			  </div>
+			  <button type="button" class="btn btn-icon btn-primary clone-btn-right clone">
+			   <i class="icofont icofont-plus"></i>
+			  </button>
+			  <button type="button" class="btn btn-icon btn-default clone-btn-right delete">
+			   <i class="icofont icofont-minus"></i>
+			  </button>
+			 </div>
+			</div>
+			<div class="col-sm-8">
+			 <div class="input-group">
+			  <span class="input-group-addon">
+			   <i class="icofont icofont-copy-alt"></i>
+			  </span>
+			  <textarea rows="1" cols="1" class="form-control" placeholder="Mã giảm giá  " asp-for="VoucherID"></textarea>
+			 </div>
+			</div>
+		   </div>
+		  </div>
+		  <div class="col-sm-7">
+		   <div class="text-center m-t-20">
+			<button type="submit" class="btn btn-primary waves-effect waves-light m-r-10">
+			 Thêm đơn hàng
+			</button>
+		   </div>
+		  </div>
+		 </form>
+		</div>
+	   </div>
+	  </div>
+	 </div>
+	</div>
+   </div>
+   <!-- Page-header end -->
+  </div>
+ </div>
+</div>
 
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}

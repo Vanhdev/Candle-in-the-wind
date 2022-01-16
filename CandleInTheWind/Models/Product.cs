@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CandleInTheWind.Models
 {
-    public class Product
+    public class Product 
     {
         public int Id { get; set; }
 

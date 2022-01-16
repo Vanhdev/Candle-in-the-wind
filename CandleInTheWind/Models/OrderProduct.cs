@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CandleInTheWind.Models
 {
-    public class OrderProduct
+    public class OrderProduct 
     {
         [Required]
         public int OrderId { get; set; }

@@ -30,6 +30,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Views\Orders\Create.cshtml" />
+    <None Include="Views\Orders\Delete.cshtml" />
+    <None Include="Views\Orders\Details.cshtml" />
+    <None Include="Views\Orders\Edit.cshtml" />
+    <None Include="Views\Orders\Index.cshtml" />
+    <None Include="Views\Shared\Error.cshtml" />
+    <None Include="Views\Shared\_Layout.cshtml" />
+    <None Include="Views\Shared\_ValidationScriptsPartial.cshtml" />
     <None Include="wwwroot\files\bower_components\bootstrap\js\bootstrap.min.js" />
     <None Include="wwwroot\files\bower_components\font-awesome\fonts\fontawesome-webfont-1.hxd" />
     <None Include="wwwroot\files\bower_components\font-awesome\fonts\fontawesome-webfont.hxd" />

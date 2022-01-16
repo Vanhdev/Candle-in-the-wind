@@ -1,48 +1,99 @@
 ﻿@model CandleInTheWind.Models.Order
 
 @{
-    ViewData["Title"] = "Details";
+	ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<div class="main-body">
+ <div class="page-wrapper">
 
-<div>
-    <h4>Order</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PurchasedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PurchasedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Total)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Total)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Voucher)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Voucher.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+  <!-- Page body start -->
+  <div class="page-body">
+   <!-- Container-fluid starts -->
+   <div class="container">
+	<!-- Main content starts -->
+	<div>
+	 <!-- Invoice card start -->
+	 <div class="card">
+	  <div class="card-block">
+	   <div class="row invoive-info">
+		<div class="col-md-4 col-xs-12 invoice-client-info">
+		 <h6>Thông tin khách hàng</h6>
+		 <h6 class="m-0">@Model.User.UserName</h6>
+		 <p class="m-0">@Model.User.Email</p>
+		 <p class="m-0">@Model.User.PhoneNumber</p>
+		</div>
+		<div class="col-md-4 col-sm-6">
+		 <h6>Thông tin đơn hàng</h6>
+		 <table class="table table-responsive invoice-table invoice-order table-borderless">
+		  <tbody>
+		   <tr>
+			<th>Id :</th>
+			<td>@Model.Id</td>
+		   </tr>
+		   <tr>
+			<th>Date :</th>
+			<td>@Model.PurchasedDate.ToShortDateString()</td> 
+		   </tr>
+		   <tr>
+			<th>Status</th>
+			<td>@Model.Status</td>
+		   </tr>
+		  </tbody>
+		 </table>
+		</div>
+	   </div>
+	   <div class="row">
+		<div class="col-sm-12">
+		 <div class="table-responsive">
+		  <table class="table">
+		   <thead>
+			<tr class="thead-default">
+			 <th>Image</th>
+			 <th>Product Name</th>
+			 <th>Until Price</th>
+			 <th>Qty</th>
+			</tr>
+		   </thead>
+		   <tbody>
+												@foreach (var item in Model.OrderProducts)
+												{
+				<tr>
+				 <td>
+				  <img src="@item.Product.ImageUrl" alt="" style="width:100px;height:100px;">
+				 </td>
+				 <td>@item.Product.Name</td>
+				 <td>@item.UnitPrice VND</td>
+				 <td>@item.Quantity</td>
+				</tr>
+												}
+		   </tbody>
+		  </table>
+		 </div>
+		</div>
+	   </div>
+	   <div class="row">
+		<div class="col-sm-12">
+		 <table class="table table-responsive invoice-table invoice-total">
+		  <tbody>
+		   <tr class="text-info">
+			<td>
+			 <h5 class="text-primary">Total :</h5>
+			</td>
+			<td>
+			 <h5 class="text-primary">@Html.DisplayFor(model => model.Total)</h5>
+			</td>
+		   </tr>
+		  </tbody>
+		 </table>
+		</div>
+	   </div>
+	  </div>
+	 </div>
+	</div>
+   </div>
+   <!-- Container ends -->
+  </div>
+  <!-- Page body end -->
+ </div>
 </div>

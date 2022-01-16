@@ -37,6 +37,8 @@ namespace CandleInTheWind.Controllers
             var order = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.Voucher)
+                .Include(o => o.OrderProducts)
+                .ThenInclude(op => op.Product)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (order == null)
             {
@@ -57,39 +59,97 @@ namespace CandleInTheWind.Controllers
         // POST: Orders/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,PurchasedDate,Status,Total,VoucherId,UserId")] Order order, 
-                                                int orderID, int productID, int quantity, int unitPrice)
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("Id,PurchasedDate,Status,Total,VoucherId,UserId")] Order order)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        _context.Add(order);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", order.UserId);
+        //    ViewData["VoucherId"] = new SelectList(_context.Vouchers, "Id", "Name", order.VoucherId);
+        //    return View(order);
+        //}
+
+        public ActionResult CreateViewModel(OrderViewModel viewModel)
         {
-            if (ModelState.IsValid)
+            var user = _context.Users.FirstOrDefault(a => a.Id == viewModel.UserID);
+            var voucher = _context.Vouchers.FirstOrDefault(a => a.Id == viewModel.VoucherID);
+
+            var order = new Order { UserId = viewModel.UserID, User = user, VoucherId = viewModel.VoucherID, Voucher = voucher };
+
+            _context.Add(order);
+            _context.SaveChanges();
+
+            List<OrderProduct> orderProducts = new List<OrderProduct>();
+
+            for (int i = 0; i < viewModel.ProductID.Count; i++)
             {
-                var orderProduct = new OrderProduct { OrderId = orderID, ProductId = productID, Quantity = quantity, UnitPrice = unitPrice };
-                _context.Add(order);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var product = _context.Products.FirstOrDefault(a => a.Id == viewModel.ProductID[i]);
+                orderProducts.Add(new OrderProduct { OrderId = order.Id, 
+                                                    ProductId = viewModel.ProductID[i], 
+                                                    Quantity = viewModel.Quantity[i], 
+                                                    Product = product, 
+                                                    Order = order,
+                                                    UnitPrice = product.Price});
             }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", order.UserId);
-            ViewData["VoucherId"] = new SelectList(_context.Vouchers, "Id", "Name", order.VoucherId);
-            return View(order);
+
+            int total = 0;
+
+            foreach(var orderProduct in orderProducts)
+            {
+                total += orderProduct.Quantity * (int)orderProduct.UnitPrice;
+
+                _context.OrderProducts.Add(orderProduct);
+            }
+
+            order.User.Points += (int)(0.05 * total);
+
+            order.Total = (order.Voucher == null) ? total : (int)(total* order.Voucher.Value);
+
+            if (order.User.Points > order.Voucher.Points && order.Voucher.Quantity > 0)
+            {
+                order.User.Points -= order.Voucher.Points;
+                order.Voucher.Quantity -= 1;
+            }
+            else
+                order.Voucher = null;
+
+            _context.AddRange(orderProducts);
+
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Orders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public ActionResult Approve(int id, OrderStatus Status)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var order = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Voucher)
+                .FirstOrDefault(a => a.Id == id);
 
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
+            order.Status = Status;
+
+            if(Status == OrderStatus.Canceled || Status == OrderStatus.NotApproved)
             {
-                return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", order.UserId);
-            ViewData["VoucherId"] = new SelectList(_context.Vouchers, "Id", "Name", order.VoucherId);
-            return View(order);
+                if (order.Voucher != null)
+                {
+                    order.User.Points += order.Voucher.Points;
+
+                    order.Voucher.Quantity += 1;
+                }
+
+                order.User.Points -= (int)(0.05 * (double)(order.Total));
+            }    
+
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // POST: Orders/Edit/5
@@ -130,34 +190,35 @@ namespace CandleInTheWind.Controllers
         }
 
         // GET: Orders/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var order = await _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.Voucher)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
+        //    var order = await _context.Orders
+        //        .Include(o => o.User)
+        //        .Include(o => o.Voucher)
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (order == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(order);
-        }
+        //    return View(order);
+        //}
 
         // POST: Orders/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        public ActionResult Delete(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = _context.Orders.FirstOrDefault(o => o.Id == id);
             _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            _context.SaveChanges();
+
+            return Ok();
         }
 
         private bool OrderExists(int id)

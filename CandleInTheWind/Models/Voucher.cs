@@ -47,7 +47,7 @@ namespace CandleInTheWind.Models
         }
 
         public string GetErrorMessage() =>
-            $"Ngày hết hạn phải muộn hơn ngày tạo mã.";
+            $"Expired date must be later than created date.";
 
         protected override ValidationResult IsValid(object value,
             ValidationContext validationContext)

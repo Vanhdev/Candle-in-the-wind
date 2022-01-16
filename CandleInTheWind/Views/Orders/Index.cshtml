@@ -1,77 +1,101 @@
 ﻿@model IEnumerable<CandleInTheWind.Models.Order>
 
 @{
-    ViewData["Title"] = "Quản lý đơn hàng";
+	ViewData["Title"] = "Quản lý đơn hàng";
 }
 
 <div class="main-body">
-                            <div class="page-wrapper">
-                                <!-- Page-header start -->
-                                <div class="page-header">
-                                    <div class="row align-items-end">
-                                        <div class="col-lg-8">
-                                            <div class="page-header-title">
-                                                <div class="d-inline">
-                                                    <h4>Danh Sách Đơn Hàng</h4>
-                                                </div>                                               
-                                            </div>                                          
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Content -->
-                                <div class="card">
-                                    <div class="card-block">
-                                        <div class="dt-responsive table-responsive">
-                                            <table id="simpletable" class="table table-striped table-bordered nowrap">
-                                                <thead>
-                                                <tr>
-                                                    <th>STT</th>
-                                                    <th>Mã đơn hàng </th>
-                                                    <th>Mã khách hàng </th>
-                                                    <th>Ngày mua </th>
-                                                    <th>Mã giảm giá</th>
-                                                    <th>Tình trạng đơn </th>
-                                                    <th>Sửa</th>
-                                                    <th>Xóa</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-@foreach (var item in Model) {
-        <tr>
-                                                        <td>1</td>
-                                                        <td>
-                                                            <a href="DatailOrder.html">@item.Id</a>
-                                                        </td>
-                                                        <td>@item.UserId</td>
-                                                        <td>@item.PurchasedDate.ToShortDateString()</td>
-                                                        <td>@item.VoucherId</td>
-                                                        <td>
-                                                            <select class="form-select" aria-label="Default select example" style="border: 0px" >
-                                                                <option selected>
-                                                                    <a href="">Chờ xử lý</a>
-                                                                </option>
-                                                                <option value="1">
-                                                                    <a href="">Đang giao</a>
-                                                                </option>
-                                                                <option value="2">
-                                                                    <a href="">Đã giao</a>
-                                                                </option>
-                                                            </select>
-                                                        </td>
-                                                        <td>
-                                                            <a asp-action="Edit" asp-route-id="@item.Id"><i class="feather icon-edit"></i></a>
-                                                        </td>
-                                                        <td>
-                                                            <a href="" data-toggle="modal" data-target="#delete-order">
-                                                                <i class="feather icon-trash-2"></i>
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-}
-    </tbody>
-</table>
+ <div class="page-wrapper">
+  <!-- Page-header start -->
+  <div class="page-header">
+   <div class="row align-items-end">
+	<div class="col-lg-8">
+	 <div class="page-header-title">
+	  <div class="d-inline">
+	   <h4>Danh Sách Đơn Hàng</h4>
+	  </div>
+	 </div>
+	</div>
+   </div>
+  </div>
+  <!-- Content -->
+  <div class="card">
+   <div class="card-block">
+	<div class="dt-responsive table-responsive">
+	 <table id="simpletable" class="table table-striped table-bordered nowrap">
+	  <thead>
+	   <tr>
+		<th>STT</th>
+		<th>Mã đơn hàng </th>
+		<th>Mã khách hàng </th>
+		<th>Ngày mua </th>
+		<th>Mã giảm giá</th>
+		<th>Tình trạng đơn </th>
+		<th>Xóa</th>
+	   </tr>
+	  </thead>
+	  <tbody>
+							@foreach (var item in Model)
+							{
+		   <tr>
+			<td>1</td>
+			<td>
+			 <a asp-action="Details" asp-route-id="@item.Id">@item.Id</a>
+			</td>
+			<td>@item.UserId</td>
+			<td>@item.PurchasedDate.ToShortDateString()</td>
+			<td>@item.VoucherId</td>
+			<td>
+			 <select class="form-select" aria-label="Default select example" style="border: 0px"
+											asp-items="@Html.GetEnumSelectList<OrderStatus>()" onchange="Approve(@item.Id, this.value)">
+			  <option selected>@item.Status</option>
+			 </select>
+			</td>
+			<td>
+			 <button onclick="DeleteItem(@item.Id)">
+			  <i class="feather icon-trash-2"></i>
+			 </button>
+			</td>
+		   </tr>
+							}
+	  </tbody>
+	 </table>
+	</div>
+   </div>
+  </div>
+ </div>
 </div>
-                                    </div>
-                                </div>
-                                </div>
-                                </div>
+@section Scripts{
+<script type="text/javascript">
+
+	 //call this function after click on confirm delete button
+	var Approve = function (val, val2)
+	{
+		$.ajax({
+		 type: "POST",
+		 url: '@Url.Action("Approve","Orders")',
+		 data:{id: val, Status: val2},
+			success: function (result) {
+				window.location.href = '@Url.Action("Index","Orders")';
+			},
+			error: function () {
+				window.location.href = '@Url.Action("Index","Orders")';
+			}
+		});
+	};
+	var DeleteItem = function (val)
+	{
+		$.ajax({
+			type: "POST",
+			url: '@Url.Action("Delete","Orders")',
+			data:{id: val},
+			success: function (result) {
+				window.location.href = '@Url.Action("Index","Orders")';
+			},
+			error: function () {
+				window.location.href = '@Url.Action("Index","Orders")';
+			}
+		});
+	};
+</script>
+}
