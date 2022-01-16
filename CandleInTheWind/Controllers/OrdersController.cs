@@ -108,7 +108,7 @@ namespace CandleInTheWind.Controllers
 
             order.User.Points += (int)(0.05 * total);
 
-            order.Total = (order.Voucher == null) ? total : (int)(total* order.Voucher.Value);
+            order.Total = (order.Voucher == null) ? total : (int)(total * order.Voucher.Value / 100);
 
             if (order.User.Points > order.Voucher.Points && order.Voucher.Quantity > 0)
             {
@@ -131,7 +131,14 @@ namespace CandleInTheWind.Controllers
             var order = _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.Voucher)
+                .Include(o => o.OrderProducts)
                 .FirstOrDefault(a => a.Id == id);
+
+            int total = 0;
+            foreach(var op in order.OrderProducts)
+            {
+                total += op.Quantity * (int)op.UnitPrice;
+            }    
 
             order.Status = Status;
 
@@ -142,9 +149,16 @@ namespace CandleInTheWind.Controllers
                     order.User.Points += order.Voucher.Points;
 
                     order.Voucher.Quantity += 1;
-                }
 
-                order.User.Points -= (int)(0.05 * (double)(order.Total));
+                    order.User.Points -= (int)(0.05 * (double)(order.Total));
+                }
+                else if(order.Total < total)
+                {
+                    int point = total - (int)order.Total;
+
+                    order.User.Points += point;
+                }    
+                
             }    
 
             _context.SaveChanges();
