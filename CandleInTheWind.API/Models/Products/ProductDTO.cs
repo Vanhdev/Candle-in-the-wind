@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CandleInTheWind.API.Models.Products
+﻿namespace CandleInTheWind.API.Models.Products
 {
     public class ProductDTO
     {
@@ -21,6 +15,7 @@ namespace CandleInTheWind.API.Models.Products
         public string ImageUrl { get; set; }
 
         public int CategoryId { get; set; }
+
         public string CategoryName { get; set; }
     }
 }

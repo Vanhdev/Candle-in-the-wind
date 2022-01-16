@@ -37,7 +37,6 @@ namespace CandleInTheWind.Models
         [Required]
         public bool Commentable { get; set; } = true;
 
-        
         public virtual User User { get; set; }
 
         public virtual ICollection<Comment> Comments { get; set; }

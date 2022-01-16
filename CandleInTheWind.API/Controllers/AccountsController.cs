@@ -10,10 +10,12 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Mail;
+using System.Net;
+using CandleInTheWind.API.Helpers;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -23,7 +25,6 @@ namespace CandleInTheWind.API.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _config;
-        //private readonly UserManager<User> _userManager;
 
         public AccountsController(ApplicationDbContext context, IConfiguration config)
         {
@@ -31,6 +32,7 @@ namespace CandleInTheWind.API.Controllers
             _config = config;
         }
 
+        // POST: api/Accounts/SignUp
         [HttpPost]
         [Route("SignUp")]
         public async Task<ActionResult> SignUp([FromBody]SignUpDTO dto)
@@ -40,14 +42,14 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new AccountResponseDTO()
                 {
                     Success = true,
-                    ErrorMessage = "Bạn đang đăng nhập"
+                    Error = "Bạn đã đăng nhập"
                 });
             }
 
             // check xem các trường thông tin có hợp lệ ko
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Error", "Đăng ký không thành công");
+                ModelState.AddModelError("error", "Đăng ký không thành công");
                 return BadRequest(ModelState);
             }
 
@@ -57,8 +59,19 @@ namespace CandleInTheWind.API.Controllers
                 return Conflict(new AccountResponseDTO()
                 {
                     Success = false,
-                    ErrorMessage = "Email này đã được đăng ký. Vui lòng sử dụng email khác"
+                    Error = "Email này đã được đăng ký. Vui lòng sử dụng email khác"
                 });
+
+            // check xem ngày sinh có hợp lệ không
+            if (dto.DateOfBirth != null)
+            {
+                if (dto.DateOfBirth >= DateTime.Now)
+                    return BadRequest(new AccountResponseDTO()
+                    {
+                        Success = false,
+                        Error = "Ngày sinh của bạn không được bằng hoặc sau ngày hiện tại"
+                    });
+            }
 
             // tạo user mới
             var newUser = new User()
@@ -78,18 +91,16 @@ namespace CandleInTheWind.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new AccountResponseDTO()
                 {
                     Success = false,
-                    ErrorMessage = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại"
+                    Error = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại"
                 });
-
-            var token = GenerateToken(newUser);
 
             return Ok(new AccountResponseDTO()
             {
                 Success = true,
-                AccessToken = token,
             });
         }
 
+        // POST: api/Accounts/SignIn
         [HttpPost]
         [Route("SignIn")]
         public async Task<ActionResult> SignIn([FromBody]SignInDTO dto)
@@ -99,20 +110,20 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new AccountResponseDTO()
                 {
                     Success = true,
-                    ErrorMessage = "Bạn đang đăng nhập"
+                    Error = "Bạn đã đăng nhập"
                 });
             }
 
             if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("Error", "Đăng nhập thất bại");
+                ModelState.AddModelError("error", "Đăng nhập thất bại");
                 return BadRequest(ModelState);
             }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
             {
-                ModelState.AddModelError("Error", "Email hoặc mật khẩu chưa chính xác");
+                ModelState.AddModelError("error", "Email hoặc mật khẩu chưa chính xác");
                 return BadRequest(ModelState);
             }
 
@@ -120,11 +131,11 @@ namespace CandleInTheWind.API.Controllers
             var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
-                ModelState.AddModelError("Error", "Email hoặc mật khẩu chưa chính xác");
+                ModelState.AddModelError("error", "Email hoặc mật khẩu chưa chính xác");
                 return BadRequest(ModelState);
             }
 
-            var token = GenerateToken(user);
+            var token = GenerateToken(user, new TimeSpan(12, 0, 0));
             return Ok(new AccountResponseDTO()
             {
                 Success = true,
@@ -132,7 +143,7 @@ namespace CandleInTheWind.API.Controllers
             });
         }
 
-        private string GenerateToken(User user)
+        private string GenerateToken(User user, TimeSpan time)
         {
             var authClaims = new List<Claim>()
             {
@@ -153,12 +164,34 @@ namespace CandleInTheWind.API.Controllers
             {
                 Issuer = _config["Jwt:ValidIssuer"],
                 Audience = _config["Jwt:ValidAudience"],
-                Expires = DateTime.UtcNow.AddMinutes(15),
+                Expires = DateTime.UtcNow.Add(time),
                 Subject = new ClaimsIdentity(authClaims),
                 SigningCredentials = new SigningCredentials(authSignKey, SecurityAlgorithms.HmacSha256Signature),
             });
 
             return tokenHandler.WriteToken(token);
+        }
+
+        [HttpPost("ForgetPassword")]
+        public async Task<ActionResult> ForgetPassword(string email, [FromServices]MailSender mailSender)
+        {
+            if (string.IsNullOrEmpty(email))
+                return BadRequest(new { Error = "Email không hợp lệ" });
+
+            var user = await _context.Users.FirstOrDefaultAsync(user => user.Email == email);
+            if (user == null)
+                return BadRequest(new { Error = "Email này chưa từng đăng ký" });
+
+            var token = GenerateToken(user, new TimeSpan(0, 5, 0));
+
+            var link = $"https://candle-in-the-wind.herokuapp.com/forgetpassword?token={token}";
+            var bodyMail = $"<p>Bạn đã sử dụng chức năng quên mật khẩu. Đây là <a href=\"{link}\">link reset lại mật khẩu</a>. Link này chỉ có thời hạn 5 phút. Nếu bạn không phải là người sử dụng chắc năng quên mật khẩu, hãy bỏ email này.</p>";
+
+            var sendingMailResult = await mailSender.SendMailAsync(bodyMail, email);
+            if (!sendingMailResult)
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Error = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại" });
+
+            return Ok(new { Message = "Shop đã gửi link reset mật khẩu đến email của bạn. Vui lòng kiểm tra email." });
         }
     }
 }

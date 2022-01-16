@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +8,14 @@ using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using CandleInTheWind.API.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using CandleInTheWind.API.Extensions;
+using System;
 
 namespace CandleInTheWind.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -25,17 +25,10 @@ namespace CandleInTheWind.API.Controllers
             _context = context;
         }
 
-        // GET: api/Users
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<User>>> GetUsers()
-        //{
-        //    return await _context.Users.ToListAsync();
-        //}
-
+        
         // GET: api/Users/Profile
         [HttpGet("Profile")]
-        [Authorize]
-        public async Task<ActionResult<ProfileDTO>> GetProfile()
+        public async Task<ActionResult> GetProfile()
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -50,26 +43,26 @@ namespace CandleInTheWind.API.Controllers
                 return NotFound();
             }
 
-            var userRepsonse = ToProfileDTO(user);
-            return Ok(userRepsonse);
+            return Ok(user.ToDTO());
         }
 
         // PUT: api/Users/UpdateInfo
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("UpdateProfile")]
-        [Authorize]
         public async Task<IActionResult> UpdateProfile([FromBody]UserDTO dto)
         {
-            //if (id != user.Id)
-            //{
-            //    return BadRequest();
-            //}
             if (!ModelState.IsValid)
             {
                 ModelState.AddModelError("Error", "Dữ liệu không hợp lệ");
                 return BadRequest(ModelState);
             }
-                
+
+            // check xem ngày sinh có hợp lệ không
+            if (dto.DateOfBirth != null)
+            {
+                if (dto.DateOfBirth >= DateTime.Now)
+                    return BadRequest(new { Error = "Ngày sinh của bạn không được bằng hoặc sau ngày hiện tại" });
+            }
+
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
                 return BadRequest(new { Error = "Không xác định được người dùng" });
@@ -82,7 +75,6 @@ namespace CandleInTheWind.API.Controllers
 
             
             user.UserName = dto.UserName;
-            user.PhoneNumber = dto.PhoneNumber;
             user.DateOfBirth = dto.DateOfBirth;
             user.Gender = dto.Gender;
 
@@ -104,7 +96,6 @@ namespace CandleInTheWind.API.Controllers
 
 
         [HttpPut("ChangePassword")]
-        [Authorize]
         public async Task<IActionResult> UpdatePassword([FromBody]UpdatePasswordDTO dto)
         {
             if (!ModelState.IsValid)
@@ -143,51 +134,6 @@ namespace CandleInTheWind.API.Controllers
             }
 
             return NoContent();
-        }
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<User>> PostUser(User user)
-        //{
-        //    _context.Users.Add(user);
-        //    await _context.SaveChangesAsync();
-
-        //    return CreatedAtAction("GetUser", new { id = user.Id }, user);
-        //}
-
-        // DELETE: api/Users/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteUser(int id)
-        //{
-        //    var user = await _context.Users.FindAsync(id);
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Users.Remove(user);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool UserExists(int id)
-        //{
-        //    return _context.Users.Any(e => e.Id == id);
-        //}
-
-        private ProfileDTO ToProfileDTO(User user)
-        {
-            return new ProfileDTO()
-            {
-                UserName = user.UserName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                DateOfBirth = user.DateOfBirth,
-                Gender = user.Gender,
-                Points = user.Points,
-            };
         }
     }
 }

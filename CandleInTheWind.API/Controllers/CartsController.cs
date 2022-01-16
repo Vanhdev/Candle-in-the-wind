@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +8,7 @@ using CandleInTheWind.Models;
 using Microsoft.AspNetCore.Authorization;
 using CandleInTheWind.API.Models.Carts;
 using System.IdentityModel.Tokens.Jwt;
+using CandleInTheWind.API.Extensions;
 
 namespace CandleInTheWind.API.Controllers
 {
@@ -27,7 +26,7 @@ namespace CandleInTheWind.API.Controllers
 
         // GET: api/Carts
         [HttpGet]
-        public async Task<ActionResult<CartListDTO>> GetProductInCart()
+        public async Task<ActionResult> GetProductInCart()
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -36,13 +35,22 @@ namespace CandleInTheWind.API.Controllers
             }
             var id = int.Parse(userIdClaim.Value);
 
-            if (!_context.Users.Any(user => user.Id == id))
+            var carts = _context.Carts.Where(cart => cart.UserId == id)
+                                      .Include(cart => cart.Product);
+
+            var removeCarts = carts.Where(cart => cart.Product.Stock == 0);
+            if (removeCarts.Count() > 0)
             {
-                return NotFound();
+                _context.Carts.RemoveRange(removeCarts);
+                var result = await _context.SaveChangesAsync();
+                if (result == 0)
+                    return StatusCode(StatusCodes.Status500InternalServerError, new
+                    {
+                        Error = "Đã xảy ra lỗi hệ thống. Vui lòng thử lại"
+                    });
             }
 
-            var carts = await _context.Carts.Where(cart => cart.UserId == id).Include(cart => cart.Product).ToListAsync();
-            var cartResponse = carts.Select(cart => ToCartDTO(cart));
+            var cartResponse = (await carts.Where(cart => cart.Product.Stock > 0).ToListAsync()).Select(cart => cart.ToDTO());
             return Ok(new CartListDTO()
             {
                 Products = cartResponse,
@@ -52,25 +60,9 @@ namespace CandleInTheWind.API.Controllers
             
         }
 
-        // GET: api/Carts/5
-        //[HttpGet("{id}")]
-        //public async Task<ActionResult<Cart>> GetCart(int id)
-        //{
-        //    var cart = await _context.Carts.FindAsync(id);
-
-        //    if (cart == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return cart;
-        //}
-
-        // PUT: api/Carts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-
+        // PUT: api/Carts/ChangeQuantity?productId=1&quantity=2
         [HttpPut("ChangeQuantity")]
-        public async Task<ActionResult<UpdateQuantityDTO>> ChangeQuantity([FromQuery]int productId, [FromQuery]int quantity)
+        public async Task<ActionResult> ChangeQuantity([FromQuery]int productId, [FromQuery]int quantity)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -78,12 +70,6 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new { Error = "Không xác định được người dùng" });
             }
             var userId = int.Parse(userIdClaim.Value);
-            var user = await _context.Users.FindAsync(userId);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
 
             if (productId <= 0)
                 return BadRequest(new { Error = "Dữ liệu không hợp lệ" });
@@ -122,10 +108,9 @@ namespace CandleInTheWind.API.Controllers
             });
         }
 
-        // POST: api/Carts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/Carts?productId=1&quantity=1
         [HttpPost]
-        public async Task<IActionResult> AddProductToCart([FromQuery]int productId, [FromQuery]int quantity = 1)
+        public async Task<ActionResult> AddProductToCart([FromQuery]int productId, [FromQuery]int quantity = 1)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -148,6 +133,9 @@ namespace CandleInTheWind.API.Controllers
             var product = await _context.Products.FirstOrDefaultAsync(product => product.Id == productId);
             if (product == null)
                 return NotFound(new { Error = "Không tìm thấy sản phẩm cần thêm" });
+
+            if (product.Stock == 0)
+                return BadRequest(new { Error = "Sản phẩm hiện đã hết hàng" });
 
             if (CartExists(id, productId))
                 return Conflict(new { Error = "Giỏ hàng của bạn đã có sản phẩm này" });
@@ -172,12 +160,12 @@ namespace CandleInTheWind.API.Controllers
                 throw;
             }
 
-            return Ok();
+            return Ok(new { Message = "Đã thêm vào giỏ hàng"});
         }
 
         // DELETE: api/Carts/5
         [HttpDelete("{productId}")]
-        public async Task<IActionResult> DeleteProductInCart([FromRoute]int productId)
+        public async Task<ActionResult> DeleteProductInCart([FromRoute]int productId)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sid);
             if (userIdClaim == null)
@@ -185,13 +173,7 @@ namespace CandleInTheWind.API.Controllers
                 return BadRequest(new { Error = "Không xác định được người dùng" });
             }
             var userId = int.Parse(userIdClaim.Value);
-            var user = await _context.Users.FindAsync(userId);
-
-            if (user == null)
-            {
-                return NotFound(new { Error = "Không tìm thấy sản phẩm cần xóa" });
-            }
-
+            
             var cart = await _context.Carts.FindAsync(userId, productId);
             if (cart == null)
             {
@@ -204,24 +186,50 @@ namespace CandleInTheWind.API.Controllers
             return NoContent();
         }
 
+        // GET: api/Carts/CheckVoucher/1
+        [HttpGet("CheckVoucher/{voucherId}")]
+        public async Task<ActionResult> CheckVoucher(int? voucherId)
+        {
+            if (voucherId == null)
+                return BadRequest(new { Error = "Chưa chọn mã giảm giá" });
+
+            var voucher = await _context.Vouchers.FindAsync((int)voucherId);
+            if (voucher == null)
+                return NotFound(new { Error = "Không tìm thấy mã giảm giá" });
+
+            var userClaimId = User.FindFirst(JwtRegisteredClaimNames.Sid);
+            if (userClaimId == null)
+                return BadRequest(new { Error = "Không xác định được người dùng" });
+            var userId = int.Parse(userClaimId.Value);
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user.Points < voucher.Points)
+                return Ok(new { success = false, totalPrice = -1 });
+
+            var total = _context.Carts.Include(cart => cart.Product)
+                                      .Where(cart => cart.UserId == userId)
+                                      .Sum(cart => cart.Quantity * cart.Product.Price);
+            return Ok(new { success = true, totalPrice = total * (decimal)(100 - voucher.Value) / 100});
+        }
+
         private bool CartExists(int userId, int productId)
         {
             return _context.Carts.Any(cart => cart.UserId == userId && cart.ProductId == productId);
         }
 
-        private CartDTO ToCartDTO(Cart cart)
-        {
-            var product = cart.Product;
-            return new CartDTO()
-            {
-                ProductId = cart.ProductId,
-                ProductName = product.Name,
-                ProductImageUrl = product.ImageUrl,
-                UnitPrice = product.Price,
-                Stock = product.Stock,
-                Quantity = cart.Quantity,
-                Price = product.Price * cart.Quantity,
-            };
-        }
+        //private CartDTO ToCartDTO(Cart cart)
+        //{
+        //    var product = cart.Product;
+        //    return new CartDTO()
+        //    {
+        //        ProductId = cart.ProductId,
+        //        ProductName = product.Name,
+        //        ProductImageUrl = product.ImageUrl,
+        //        UnitPrice = product.Price,
+        //        Stock = product.Stock,
+        //        Quantity = cart.Quantity,
+        //        Price = product.Price * cart.Quantity,
+        //    };
+        //}
     }
 }

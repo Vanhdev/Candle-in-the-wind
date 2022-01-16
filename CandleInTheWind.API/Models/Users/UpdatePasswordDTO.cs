@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CandleInTheWind.API.Models.Users
 {
@@ -15,11 +10,11 @@ namespace CandleInTheWind.API.Models.Users
 
         [Required]
         [DataType(DataType.Password)]
-        [Compare("CurrentPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
-        public string ConfirmCurrentPassword { get; set; }
+        public string NewPassword { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        public string NewPassword { get; set; }
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp")]
+        public string ConfirmNewPassword { get; set; }
     }
 }
