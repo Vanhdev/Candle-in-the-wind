@@ -44,7 +44,9 @@ namespace CandleInTheWind
             services.AddAuthentication("CookieAuth").AddCookie("CookieAuth", options =>
             {
                 options.Cookie.Name = "CookieAuth";
-                options.Cookie.MaxAge = TimeSpan.FromMinutes(2);
+                options.Cookie.MaxAge = TimeSpan.FromMinutes(15);
+                options.LoginPath = "/Authentication/Login";
+                
 
             });
             services.AddControllersWithViews();
@@ -76,6 +78,8 @@ namespace CandleInTheWind
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

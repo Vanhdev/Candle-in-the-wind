@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CandleInTheWind.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;

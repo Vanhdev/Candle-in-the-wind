@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CandleInTheWind.Data;
 using CandleInTheWind.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CandleInTheWind.Controllers
 {
+    [Authorize]
     public class PostsController : Controller
     {
         private readonly ApplicationDbContext _context;

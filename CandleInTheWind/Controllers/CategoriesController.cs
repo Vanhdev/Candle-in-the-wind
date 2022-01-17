@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace CandleInTheWind.Controllers
 {
+    [Authorize]
     public class CategoriesController : Controller
     {
         private readonly ApplicationDbContext _context;
