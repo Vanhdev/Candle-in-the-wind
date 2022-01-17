@@ -13,10 +13,11 @@ Project Introduction to Software Engineering
 2. Mở repo bằng Visual Studio.
 
 3. Trong project CandleInTheWind và project CandleInTheWind.API, mỗi project thêm file **appsettings.Development.json** có nội dung:
-{
-	"ConnectionStrings": {
-		"DefaultConnection": "Server=<tên SQL Serer>;Initial Catalog=<tên Database>;Integrated Security=True"
-	}
+```json
+{ 
+    "ConnectionStrings": { 
+        "DefaultConnection": "Server=<tên SQL Serer>;Initial Catalog=<tên Database>;Integrated Security=True" 
+    } 
 }
-
+```
 4. Trong Visual Studio, chọn *Tools > NuGet Package Manager > Package Management Console* và chạy lệnh *Update-Database*
