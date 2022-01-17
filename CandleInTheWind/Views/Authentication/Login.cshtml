@@ -1,0 +1,58 @@
+﻿@model CandleInTheWind.Models.AdminAccount
+
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> Admin - CandleInTheWind </title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="~/files/assets/css/login.css">
+</head>
+<body>
+    <section>
+        <div class="img-bg">
+            <img src="/Images/login_admin.jpg" alt="Login Admin">
+        </div>
+        <div class="noidung">
+            <form class="form" asp-action="Login" enctype="multipart/form-data">
+                <h1>
+                    Đăng nhập
+                </h1>
+                <p>
+                    Chào bạn! Đây là trang đăng nhập dành cho Admin hệ thống <strong>Candle in the Wind</strong>
+                </p>
+                <br>
+                <br>
+                <div class="input-form">
+                    <span class="username">Email</span>
+                    <input asp-for="Email" required>
+                </div>
+                <br>
+                <div class="input-form">
+                    <span class="password">Mật khẩu</span>
+                    <input asp-for="Password" required>
+                </div>
+                <br>
+                <div class="input-form">
+                    <input type="submit" value="Đăng Nhập">
+                </div>
+                <br>
+                <div class="input-form">
+                    <a href="https://candle-in-the-wind.herokuapp.com/">Chuyển đến trang cho Khách hàng</a>
+                </div>
+            </form>
+        </div>
+    </section>
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    @if (ViewBag.Message != null)
+    {
+        <script>
+        alert("Đăng nhập thất bại!\nTài khoản hoặc mật khẩu bạn cung cấp không chính xác!");
+        </script>
+    }
+</body>
+</html>

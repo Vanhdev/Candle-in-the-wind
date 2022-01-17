@@ -65,6 +65,14 @@ namespace CandleInTheWind
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
+
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                    System.IO.Path.Combine(env.ContentRootPath, "Images")),
+                RequestPath = "/images",
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -73,6 +81,9 @@ namespace CandleInTheWind
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "start",
+                    pattern: "{controller=Authentication}/{action=Login}/{id?}");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

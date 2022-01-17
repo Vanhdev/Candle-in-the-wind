@@ -1,0 +1,74 @@
+﻿@model CandleInTheWind.Models.Product
+
+@{
+    ViewBag.Title = "Thông tin chi tiết";
+}
+<div class="modal fade" id="detail-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title detail-modal-title">@ViewBag.Title.ToUpper()</h4>
+                <button type="button" class="modal-button" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body detail-modal-body">
+                <form class="md-float-material card-block">
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <div class="col-sm-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icofont icofont-social-livejournal"></i></span>
+                                    <input type="text" value="@Model.Id" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icofont icofont-social-livejournal"></i></span>
+                                    <input type="text" value="@Model.Name" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icofont icofont-cur-dollar"></i></span>
+                                    <input type="text" value="@(String.Format("{0:0,0  VNĐ}", Model.Price))" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icofont icofont-numbered"></i></span>
+                                    <input type="number" value="@Model.Stock" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icofont icofont-align-left"></i></span>
+                                    <input type="text" value="@Model.Category.Name" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="icofont icofont-copy-alt"></i></span>
+                                    <textarea rows="3" cols="3" class="form-control" readonly>@Model.Description</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-5">
+                            <div class="card rounded-card user-card">
+                                <div class="card-block">
+                                    <div class="img-hover">
+                                        <img src="/Images/@Model.ImageUrl" asp-append-version="true" class="img-fluid img-radius" id="image" width="150" alt="Hình ảnh" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info waves-effect waves-light modal-button" id="modal-edit">Chỉnh sửa </button>
+                <button type="button" class="btn btn-primary waves-effect modal-button">OK </button>
+            </div>
+        </div>
+    </div>
+</div>
