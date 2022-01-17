@@ -44,7 +44,9 @@ namespace CandleInTheWind
             services.AddAuthentication("CookieAuth").AddCookie("CookieAuth", options =>
             {
                 options.Cookie.Name = "CookieAuth";
-                options.Cookie.MaxAge = TimeSpan.FromMinutes(2);
+                options.Cookie.MaxAge = TimeSpan.FromMinutes(15);
+                options.LoginPath = "/Authentication/Login";
+                
 
             });
             services.AddControllersWithViews();
@@ -65,14 +67,27 @@ namespace CandleInTheWind
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
+
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                    System.IO.Path.Combine(env.ContentRootPath, "Images")),
+                RequestPath = "/images",
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "start",
+                    pattern: "{controller=Authentication}/{action=Login}/{id?}");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

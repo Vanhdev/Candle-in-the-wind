@@ -142,7 +142,7 @@
 											</a>
 										</li>
 										<li>
-											<a href="auth-normal-sign-in.htm">
+											<a asp-controller="Authentication" asp-action="Logout">
 												<i class="feather icon-log-out"></i> Logout
 											</a>
 										</li>
@@ -166,12 +166,12 @@
 									</a>
 									<ul class="pcoded-submenu">
 										<li class="">
-											<a href="ListProduct.html">
+											<a asp-controller ="Products" asp-action="Index">
 												<span class="pcoded-mtext">Danh Sách Sản Phẩm</span>
 											</a>
 										</li>
 										<li class="">
-											<a href="#">
+											<a asp-controller ="Products" asp-action="Create">
 												<span class="pcoded-mtext">Thêm Sản Phẩm</span>
 											</a>
 										</li>
@@ -230,7 +230,7 @@
 									</a>
 									<ul class="pcoded-submenu">
 										<li class="">
-											<a href="ListCategory.html">
+											<a asp-controller ="Categories" asp-action="Index">
 												<span class="pcoded-mtext">Hạng Mục Sản Phẩm</span>
 											</a>
 										</li>

@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using CandleInTheWind.Data;
 using CandleInTheWind.Models;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CandleInTheWind.Controllers
 {
+    [Authorize]
     public class VouchersController : Controller
     {
         private readonly ApplicationDbContext _context;

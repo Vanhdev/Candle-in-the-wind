@@ -1,0 +1,22 @@
+﻿<!--SEARCH CARD-->
+<div class="card" id="card-search">
+    <div class="card-block">
+        <div class="row align-items-center">
+            <div class="col-lg offset-lg-1 offset-sm col-sm col-xs-12">
+                <button class="input-group-addon btn btn-primary" id="btn-create">Thêm hạng mục</button>
+            </div>
+
+            <div class="col-lg offset-lg-1 col-sm-6 offset-sm-1 col-xs-12">
+                <div class="seacrh-header">
+                    <div class="input-group input-group-button input-group-primary">
+                        <input type="text" class="form-control" id="search-text" value="@ViewBag.Filter" placeholder="Search here...">
+                        <button class="btn btn-primary input-group-addon" id="search-button" data-controller="Categories">Tìm kiếm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
