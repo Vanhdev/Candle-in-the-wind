@@ -1,0 +1,28 @@
+﻿@model CandleInTheWind.Models.Category
+
+<div class="card" id="card-create">
+    <div class="card-block">
+        <div class="row">
+            <form asp-action="Create" class="row col-sm-9">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="col-sm-6 offset-sm-1">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="icofont icofont-social-livejournal"></i></span>
+                        <input asp-for="Name" class="form-control" placeholder="@Html.DisplayNameFor(x => x.Name)" required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-2 offset-sm-1">
+                    <button type="submit" class="btn btn-primary" id="create-submit">Thêm</button>
+                </div>
+            </form>
+            <div class="col-sm-2">
+                <button class="btn btn-primary cancel" id="create-cancel">Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

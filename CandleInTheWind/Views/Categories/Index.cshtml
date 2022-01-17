@@ -1,0 +1,188 @@
+﻿@model CandleInTheWind.Models.PaginatedList<Category>
+
+@{
+    ViewData["Title"] = "Danh sách hạng mục";
+    int page = Model.PageIndex;
+}
+@*<div class="pcoded-content">
+    <div class="pcoded-inner-content">*@
+        <!-- Main-body start -->
+        <div class="main-body">
+            <div class="page-wrapper">
+                <!-- Page-header start -->
+                <div class="page-header">
+                    <div class="row align-items-end">
+                        <div class="col-lg-8">
+                            <div class="page-header-title">
+                                <div class="d-inline">
+                                    <h4>@ViewBag.Title.ToUpper()</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="change-status"></div>
+                <div class="partial">
+                    <partial name="_Search" />
+                    <partial name="_Edit" model="new Category()" />
+                    <partial name="_Create" model="new Category()" />
+                </div>
+                <!-- Content -->
+                <div class="card">
+                    <div class="card-block">
+                        <div class="dt-responsive table-responsive">
+                            <table id="simpletable" class="table table-striped table-bordered nowrap">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">
+                                            @Html.Raw("STT")
+                                        </th>
+                                        <th class="text-center">
+                                            Mã hạng mục
+                                        </th>
+                                        <th class="text-center">
+                                            <a href="" data-sort="@ViewBag.SortType" class="sort-column">
+                                                Tên hạng mục
+                                            </a>
+                                        </th>
+                                        <th class="text-center">
+                                            @Html.Raw("Sửa")
+                                        </th>
+                                        <th class="text-center">
+                                            @Html.Raw("Xóa")
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int i = (page - 1) * CandleInTheWind.Models.Constants.PageSize + 1;
+                                        foreach (var item in Model)
+                                        {
+                                            if (item == null)
+                                                break;
+                                            <tr>
+                                                <td class="text-center">
+                                                    @Html.Raw(i.ToString())
+                                                </td>
+                                                <td class="text-center">
+                                                    @Html.DisplayFor(modelItem => item.Id)
+                                                </td>
+                                                <td>
+                                                    @Html.DisplayFor(modelItem => item.Name)
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="#" id="edit-link"><i class="feather icon-edit"></i></a>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="#" data-action="Delete" data-id="@item.Id" data-controller="Categories"
+                                                       data-message="Bạn có chắc muốn xóa hạng mục sản phẩm này và toàn bộ các sản phẩm phụ thuộc?"
+                                                       data-toggle="modal" data-target="#delete-modal" class="delete">
+                                                        <i class="feather icon-trash-2"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            ++i;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-block">
+                            <nav style="position:absolute; right: 0">
+                                <ul class="pagination" data-controller="Categories">
+                                    <li class="page-item">
+                                        <a data-page="1"
+                                           class="page-link btn btn-default @(page <= 1 ? "disabled" : "")">
+                                            &laquo;
+                                            <span class="sr-only">First</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item" @(Model.PreviousPage ? "" : "hidden")>
+                                        <a class="page-link btn btn-default @(Model.PreviousPage ? "" : "disabled")"
+                                           data-page="@(page - 1)">
+                                            @(page - 1)
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="btn btn-default" style="background-color:lightgreen;"
+                                           href="javascript:void(0)">
+                                            @(page)
+                                        </a>
+                                    </li>
+                                    <li class="page-item" @(Model.NextPage ? "" : "hidden")>
+                                        <a class="page-link btn btn-default @(Model.NextPage ? "" : "disabled")"
+                                           data-page="@(page + 1)">
+                                            @(page + 1)
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link btn btn-default @(page >= Model.TotalPages ? "disabled" : "")"
+                                           data-page="@(Model.TotalPages)">
+                                            &raquo;
+                                            <span class="sr-only">Last</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <!-- Page-header end -->
+            </div>
+        </div>
+    @*</div>
+</div>*@
+@section Scripts{
+    <script>
+        $((function () {
+            $('#card-create').hide();
+            $('#card-edit').hide();
+            $('a#edit-link').on('click', 'i', (e) => {
+                var tdel = $(e.target).parents("td").prev();
+                var name = tdel.text().trim();
+                var id = tdel.prev().text().trim();
+                $('.edit-id').attr("value", id);
+                $('#edit-name').attr("value", name);
+                $('#card-search').hide();
+                $('#card-create').hide();
+                $('#card-edit').show();
+            });
+            $('#card-create').on('click', "button#create-cancel", () => {
+                $('#card-create').hide();
+                $('#card-search').show();
+            });
+            $('#card-edit').on('click', "button#edit-cancel", () => {
+                $('#card-edit').hide();
+                $('#card-search').show();
+            });
+            $('#card-search').on('click', "#btn-create", () => {
+                $('#card-search').hide();
+                $('#card-edit').hide();
+                $('#card-create').show();
+            });
+        }));
+    </script>
+    <script type="text/javascript" src="~/files/assets/js/delete.js"></script>
+    <script type="text/javascript" src="~/files/assets/js/detail.js"></script>
+    <script type="text/javascript" src="~/files/assets/js/paging.js"></script>
+    @if (ViewBag.ChangeStatus == CandleInTheWind.Models.Status.Success)
+    {
+        <script>
+            var nof = $('#change-status');
+            nof.html("@(ViewBag.Message == null ? "Thao tác được thực hiện <strong>Thành công</strong> !"
+                            : Html.Raw(ViewBag.Message))");
+            nof.html();
+            nof.attr("class", "alert alert-success");
+            nof.show().delay(3000).fadeOut();
+        </script>
+    }
+    else if (ViewBag.ChangeStatus == CandleInTheWind.Models.Status.Fail)
+    {
+        <script>
+            var nof = $('#change-status');
+            nof.html("@(ViewBag.Message == null ? "Có lỗi khi thực hiện thao tác" : Html.Raw(ViewBag.Message))");
+            nof.attr("class", "alert alert-danger");
+            nof.show().delay(3000).fadeOut();
+        </script>
+    }
+}

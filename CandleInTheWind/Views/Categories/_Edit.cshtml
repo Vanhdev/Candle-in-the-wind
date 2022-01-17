@@ -1,0 +1,35 @@
+﻿@model CandleInTheWind.Models.Category
+
+<div class="card" id="card-edit">
+    <div class="card-block">
+        <div class="row align-items-center">
+            <form class="md-float-material card-block row col-sm-10" asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="col-sm-3">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="icofont icofont-social-livejournal"></i></span>
+                        <input value="@Model.Id" class="form-control edit-id" disabled>
+                        <input asp-for="Id" class="edit-id" hidden />
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="icofont icofont-social-livejournal"></i></span>
+                        <input asp-for="Name" class="form-control" id="edit-name" placeholder="@Html.DisplayNameFor(x => x.Name)" required />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                    <button type="submit" class="btn btn-primary" id="edit-submit">Sửa</button>
+                </div>
+            </form>
+            <div class="col-sm-1">
+                <button class="btn btn-primary" id="edit-cancel">Hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

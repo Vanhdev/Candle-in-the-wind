@@ -1,0 +1,144 @@
+﻿@model CandleInTheWind.Models.Product
+
+@{
+    ViewData["Title"] = "Cập nhật sản phẩm";
+}
+@*<div class="pcoded-content">
+    <div class="pcoded-inner-content">*@
+        <!-- Main-body start -->
+        <div class="main-body">
+            <div class="page-wrapper">
+                <!-- Page-header start -->
+                <div class="page-header">
+                    <div class="row align-items-end">
+                        <div class="col-lg-8">
+                            <div class="page-header-title">
+                                <div class="d-inline">
+                                    <h4>@ViewBag.Title.ToUpper() </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="change-status"></div>
+                <!-- Edit Product -->
+                <div class="card">
+                    <div class="card-block">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="product-edit">
+                                    <!-- Tab panes -->
+                                    <div class="tab-content">
+                                        <div class="tab-pane active" id="home7" role="tabpanel">
+                                            <form class="md-float-material card-block" asp-action="Edit" enctype="multipart/form-data">
+                                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                                <div class="row">
+                                                    <div class="col-sm-8">
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="icofont icofont-social-livejournal"></i></span>
+                                                                <input asp-for="Id" class="form-control" hidden>
+                                                                <input value="@Model.Id" class="form-control" disabled>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="icofont icofont-social-livejournal"></i></span>
+                                                                <input asp-for="Name" class="form-control" placeholder="@Html.DisplayNameFor(x => x.Name)" />
+                                                                <span asp-validation-for="Name" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="icofont icofont-cur-dollar"></i></span>
+                                                                <input asp-for="Price" class="form-control" placeholder="@Html.DisplayNameFor(x => x.Price)">
+                                                                <span asp-validation-for="Price" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="icofont icofont-numbered"></i></span>
+                                                                <input asp-for="Stock" class="form-control" placeholder="@Html.DisplayNameFor(x => x.Stock)">
+                                                                <span asp-validation-for="Stock" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="icofont icofont-stock-search"></i></span>
+                                                                <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-select form-control" required></select>
+                                                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="icofont icofont-copy-alt"></i></span>
+                                                                <textarea rows="3" cols="3" class="form-control" asp-for="Description" placeholder="@Html.DisplayNameFor(m => m.Description)"></textarea>
+                                                                <span asp-validation-for="Description" class="text-danger"></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-addon"><i class="icofont icofont-upload"></i></span>
+                                                                <input type="file" class="form-control" accept="image/*" asp-for="Image" id="filer_input imageFile" onchange="chooseFile(this)">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="card rounded-card user-card">
+                                                            <div class="card-block">
+                                                                <div class="img-hover">
+                                                                    <img class="img-fluid img-radius" id="image" src="/Images/@Model.ImageUrl" alt="Hình ảnh">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-7">
+                                                        <div class="text-center m-t-20">
+                                                            <input type="submit" value="Cập nhật sản phẩm" class="btn btn-primary waves-effect waves-light m-r-10">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-5">
+                                                        <div class="text-center m-t-20">
+                                                            <a asp-action="Index" class="btn btn-danger waves-effect waves-light m-r-10">Về trang Danh sách</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Page-header end -->
+                </div>
+            </div>
+        </div>
+    @*</div>
+</div>*@
+
+@section Scripts {
+    <script>
+        function chooseFile(fileInput) {
+            if (fileInput.files && fileInput.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#image').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+    </script>
+    @if (ViewBag.ChangeStatus == CandleInTheWind.Models.Status.Fail)
+    {
+        <script>
+            var nof = $('#change-status');
+            nof.html("Cập nhật sản phẩm <strong> Thất bại </strong> ! Xem chi tiết bên dưới");
+            nof.attr("class", "alert alert-danger");
+            nof.show().delay(3000).fadeOut();
+        </script>
+    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

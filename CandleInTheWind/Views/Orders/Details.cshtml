@@ -1,7 +1,7 @@
 ﻿@model CandleInTheWind.Models.Order
 
 @{
-	ViewData["Title"] = "Details";
+	ViewData["Title"] = "Chi tiết đơn hàng";
 }
 
 <div class="main-body">
@@ -26,20 +26,24 @@
 		<div class="col-md-4 col-sm-6">
 		 <h6>Thông tin đơn hàng</h6>
 		 <table class="table table-responsive invoice-table invoice-order table-borderless">
-		  <tbody>
-		   <tr>
-			<th>Id :</th>
-			<td>@Model.Id</td>
-		   </tr>
-		   <tr>
-			<th>Date :</th>
-			<td>@Model.PurchasedDate.ToShortDateString()</td> 
-		   </tr>
-		   <tr>
-			<th>Status</th>
-			<td>@Model.Status</td>
-		   </tr>
-		  </tbody>
+             <tbody>
+                 <tr>
+                     <th>Id :</th>
+                     <td>@Model.Id</td>
+                 </tr>
+                 <tr>
+                     <th>Date :</th>
+                     <td>@Model.PurchasedDate.ToShortDateString()</td>
+                 </tr>
+                 <tr>
+                     <th>Status</th>
+                     <td>@Model.Status</td>
+                 </tr>
+                 <tr>
+                     <th>Voucher</th>
+                     <td>@(Model.Voucher != null ? Model.Voucher.Value : 0)%</td>
+                 </tr>
+             </tbody>
 		 </table>
 		</div>
 	   </div>
@@ -60,7 +64,7 @@
 												{
 				<tr>
 				 <td>
-				  <img src="@item.Product.ImageUrl" alt="" style="width:100px;height:100px;">
+				  <img src="/Images/@item.Product.ImageUrl" alt="" style="width:100px;height:100px;">
 				 </td>
 				 <td>@item.Product.Name</td>
 				 <td>@(String.Format("{0:0,0  VNĐ}", item.UnitPrice))</td>
