@@ -108,7 +108,7 @@ namespace CandleInTheWind.Controllers
 
             order.User.Points += (int)(0.05 * total);
 
-            order.Total = (order.Voucher == null) ? total : (int)(total * order.Voucher.Value / 100);
+            order.Total = (order.Voucher == null) ? total : (int)(total - total * order.Voucher.Value / 100);
 
             if (order.Voucher != null && order.User.Points > order.Voucher.Points && order.Voucher.Quantity > 0)
             {
