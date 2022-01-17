@@ -148,11 +148,11 @@ namespace CandleInTheWind.Controllers
 
                     order.Voucher.Quantity += 1;
 
-                    order.User.Points -= (int)(0.05 * (double)(order.Total));
+                    order.User.Points -= (int)(0.05 * (double)(total));
                 }
                 else if(order.Total < total)
                 {
-                    int point = total - (int)order.Total;
+                    int point = total - (int)(order.Total);
 
                     order.User.Points += point;
                 }    
@@ -227,6 +227,7 @@ namespace CandleInTheWind.Controllers
         public ActionResult Delete(int id)
         {
             var order = _context.Orders.FirstOrDefault(o => o.Id == id);
+
             _context.Orders.Remove(order);
             _context.SaveChanges();
 

@@ -63,7 +63,7 @@
 				  <img src="@item.Product.ImageUrl" alt="" style="width:100px;height:100px;">
 				 </td>
 				 <td>@item.Product.Name</td>
-				 <td>@item.UnitPrice VND</td>
+				 <td>@(String.Format("{0:0,0  VNĐ}", item.UnitPrice))</td>
 				 <td>@item.Quantity</td>
 				</tr>
 												}
@@ -81,7 +81,7 @@
 			 <h5 class="text-primary">Total :</h5>
 			</td>
 			<td>
-			 <h5 class="text-primary">@Html.DisplayFor(model => model.Total) VNĐ</h5>
+			 <h5 class="text-primary">@(String.Format("{0:0,0  VNĐ}", Model.Total))</h5>
 			</td>
 		   </tr>
 		  </tbody>
