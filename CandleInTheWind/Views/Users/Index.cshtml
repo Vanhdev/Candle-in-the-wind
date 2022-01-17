@@ -52,10 +52,10 @@
 			   <td><a href="">@item.Id</a></td>
 			   <td><a asp-action="Details" asp-route-id="@item.Id">@item.UserName</a></td>
 			   <td>@item.Email</td>
-			   <td>@item.DateOfBirth</td>
+			   <td>@item.DateOfBirth?.ToShortDateString()</td>
 			   <td>@item.PhoneNumber</td>
 			   <td>@item.Points</td>
-			   <td>@item.Gender</td>
+			   <td>@(item.Gender == Gender.Male ? "Nam" : (item.Gender == Gender.Female ? "Nữ" : "Khác" ))</td>
 			   <td>
 				<a href="" data-toggle="modal" data-target="#delete-customer" onclick="deleteConfirm(@item.Id)">
 				 <i class="feather icon-trash-2"></i>
